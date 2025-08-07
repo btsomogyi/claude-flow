@@ -6,7 +6,7 @@
     "CLAUDE_FLOW_TELEMETRY_ENABLED": "true",
     "CLAUDE_FLOW_REMOTE_EXECUTION": "true",
     "CLAUDE_FLOW_GITHUB_INTEGRATION": "true",
-    "CLAUDE_FLOW_CHECKPOINTS_ENABLED": "true",
+    "CLAUDE_FLOW_CHECKPOINTS_ENABLED": "false",
     "CREATE_GH_RELEASE": "true"
   },
   "permissions": {

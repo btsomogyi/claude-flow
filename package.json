@@ -117,6 +117,7 @@
     "@types/better-sqlite3": "^7.6.13",
     "blessed": "^0.1.81",
     "chalk": "^4.1.2",
+    "claude-flow": "^2.0.0-alpha.88",
     "cli-table3": "^0.6.3",
     "commander": "^11.1.0",
     "cors": "^2.8.5",
