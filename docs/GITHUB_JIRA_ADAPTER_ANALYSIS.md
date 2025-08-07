@@ -52,12 +52,12 @@ This document provides a comprehensive analysis of patterns between GitHub Proje
 | Item | Issue | Direct 1:1 | Individual work units |
 | Field | Field | Direct 1:1 | Custom data attributes |
 | Status | Status | Direct 1:1 | Work state tracking |
+| Iteration | Sprint | Direct 1:1 | Time-boxed work periods with start/end dates |
 | Label | Label/Component | Configurable | Different semantic meanings |
 | Assignee | Assignee | Direct 1:1 | Work ownership |
 | Milestone | Version/FixVersion | Contextual | Release planning |
 | Repository | N/A | GitHub-specific | Source code context |
 | N/A | Epic | Jira-specific | Hierarchical work organization |
-| N/A | Sprint | Jira-specific | Time-boxed work iterations |
 
 ### 2.2 Operation Mappings
 
