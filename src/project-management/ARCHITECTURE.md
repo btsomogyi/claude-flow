@@ -351,3 +351,143 @@ Auth Request → Credential Validation → Token Management → Platform Connect
 - **Alerting**: Proactive issue detection and notification
 
 This C4 architecture provides a comprehensive view of the Unified Project Management Interface, from high-level context down to implementation details, ensuring clear communication of the system's design and facilitating effective development and maintenance.
+
+## Development Roadmap
+
+### Phase 1: Single Repository Projects (Weeks 1-4)
+**Goal**: Support project management within a single repository context
+
+**Deliverables**:
+- Basic GitHub Projects and Jira adapter implementations
+- Single repository issue tracking and management
+- Basic field mapping between platforms
+- Simple status transitions and workflows
+- Issue metadata includes branch references when moved from backlog
+- Automatic branch tagging: `feature/{issue-id}`, `bug/{issue-id}`
+
+**Branch Metadata Format**:
+```typescript
+interface IssueBranchMetadata {
+  branchName: string;        // e.g., "feature/PROJ-123-user-auth"
+  branchUrl: string;         // Full URL to branch
+  createdAt: Date;
+  lastCommit?: string;       // SHA of latest commit
+  pullRequest?: {
+    number: number;
+    url: string;
+    status: 'open' | 'closed' | 'merged';
+  };
+}
+```
+
+### Phase 2: Multi-Repository Single Project (Weeks 5-8)
+**Goal**: Support projects spanning multiple repositories within a single project context
+
+**Deliverables**:
+- Multi-repository issue aggregation
+- Cross-repository search and filtering
+- Repository-aware branch naming conventions
+- Consolidated project views across repositories
+- Enhanced branch metadata with repository context
+- Support for monorepo and polyrepo architectures
+
+**Enhanced Metadata**:
+```typescript
+interface MultiRepoBranchMetadata extends IssueBranchMetadata {
+  repository: {
+    name: string;
+    url: string;
+    defaultBranch: string;
+  };
+  relatedBranches?: Array<{
+    repository: string;
+    branchName: string;
+    url: string;
+  }>;
+}
+```
+
+### Phase 3: Multi-Repository Linked Projects (Weeks 9-12)
+**Goal**: Support complex project hierarchies with inter-project dependencies
+
+**Deliverables**:
+- Project dependency management
+- Cross-project issue linking
+- Hierarchical branching strategies for Jira epics
+- Automated parent/child branch creation
+- Inter-project synchronization
+- Advanced workflow orchestration
+
+**Hierarchical Branching Strategy**:
+```typescript
+interface HierarchicalBranching {
+  // For Jira Epic/Story/Task hierarchy
+  epic?: {
+    branchName: string;      // e.g., "epic/PROJ-100-payment-system"
+    childBranches: Array<{
+      type: 'story' | 'task' | 'bug';
+      branchName: string;    // e.g., "story/PROJ-101-from-epic-100"
+      parentBranch: string;  // Points to epic branch
+    }>;
+  };
+  
+  // Automatic branch creation rules
+  branchingRules: {
+    createParentBranch: boolean;     // Auto-create epic branch
+    branchFromParent: boolean;       // Child branches from parent
+    namingPattern: string;            // Template for branch names
+    autoLinkPullRequests: boolean;   // Link PRs in hierarchy
+  };
+}
+```
+
+**Automatic Branch Management**:
+- When an epic is moved from backlog, create parent branch: `epic/{epic-id}`
+- When stories/tasks under epic are started, branch from epic: `story/{issue-id}-from-{epic-id}`
+- Maintain branch hierarchy metadata in issue custom fields
+- Support automatic PR chain creation for hierarchical merges
+
+**Issue Metadata Enhancement**:
+```typescript
+interface EnhancedIssueMetadata {
+  // Core branch information
+  branch: IssueBranchMetadata | MultiRepoBranchMetadata;
+  
+  // Work tracking
+  workState: {
+    inBacklog: boolean;
+    activeBranch?: string;
+    commits: number;
+    lastActivity: Date;
+  };
+  
+  // Hierarchical context (for Jira)
+  hierarchy?: {
+    parentIssue?: string;
+    parentBranch?: string;
+    childIssues: string[];
+    childBranches: string[];
+  };
+  
+  // Links for agent inspection
+  links: {
+    branch: string;
+    commits: string;
+    pullRequest?: string;
+    ciStatus?: string;
+  };
+  
+  // Custom fields for platform-specific data
+  platformMetadata: Record<string, any>;
+}
+```
+
+**Agent Inspection Interface**:
+Other agents inspecting issues can access work state through:
+1. Issue description/body containing branch links
+2. Custom fields with branch metadata
+3. Comments with automated status updates
+4. Labels/tags indicating work state
+5. Webhook events for real-time updates
+
+This phased approach ensures progressive enhancement of capabilities while maintaining stability and allowing for iterative feedback and refinement.
