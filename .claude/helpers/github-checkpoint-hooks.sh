@@ -1,6 +1,12 @@
 #!/bin/bash
 # GitHub-specific checkpoint hook functions for Claude settings.json
 
+# Check if checkpoints are enabled
+if [ "${CLAUDE_FLOW_CHECKPOINTS_ENABLED:-true}" = "false" ]; then
+    echo "ℹ️  Checkpoints disabled (CLAUDE_FLOW_CHECKPOINTS_ENABLED=false)"
+    exit 0
+fi
+
 # Function to handle pre-edit checkpoints
 pre_edit_checkpoint() {
     local tool_input="$1"
@@ -36,6 +42,11 @@ EOF
 
 # Function to handle post-edit checkpoints with GitHub release
 post_edit_checkpoint() {
+    # Check if checkpoints are disabled
+    if [ "${CLAUDE_FLOW_CHECKPOINTS_ENABLED:-true}" = "false" ]; then
+        return 0
+    fi
+
     local tool_input="$1"
     local file=$(echo "$tool_input" | jq -r '.file_path // empty')
     
