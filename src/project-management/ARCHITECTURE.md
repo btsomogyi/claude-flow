@@ -491,3 +491,404 @@ Other agents inspecting issues can access work state through:
 5. Webhook events for real-time updates
 
 This phased approach ensures progressive enhancement of capabilities while maintaining stability and allowing for iterative feedback and refinement.
+
+## Multi-Swarm Coordination Architecture
+
+### Overview
+The multi-swarm coordination system implements a hierarchical team structure where specialized swarms (Pizza Teams) work on specific modules or features, coordinated by a Project Management swarm with oversight from Architecture and QA teams.
+
+### Swarm Team Structure
+
+```
+┌──────────────────────────────────────────────────────────────────────────────────────┐
+│                        MULTI-SWARM COORDINATION SYSTEM                              │
+├──────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                      │
+│  ┌─────────────────────────────────────────────────────────────────────────────┐   │
+│  │                      PROJECT MANAGEMENT SWARM                               │   │
+│  │                                                                             │   │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │   │
+│  │  │ Sprint       │  │ Task         │  │ Resource     │  │ Delivery     │  │   │
+│  │  │ Planning     │  │ Assignment   │  │ Allocation   │  │ Tracking     │  │   │
+│  │  └──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘  │   │
+│  └─────────────────────────────────────────────────────────────────────────────┘   │
+│                                    │                                                │
+│                    ┌───────────────┼───────────────┐                               │
+│                    │               │               │                               │
+│                    ▼               ▼               ▼                               │
+│  ┌──────────────────────┐ ┌──────────────────────┐ ┌──────────────────────┐      │
+│  │  ARCHITECTURE SWARM  │ │    QA/TEST SWARM     │ │   DEVOPS SWARM       │      │
+│  │                      │ │                      │ │                      │      │
+│  │  • Design Review     │ │  • Test Planning     │ │  • CI/CD Pipeline    │      │
+│  │  • Tech Decisions    │ │  • Validation        │ │  • Deployment        │      │
+│  │  • API Contracts     │ │  • Integration Tests │ │  • Monitoring        │      │
+│  │  • Standards         │ │  • Performance Tests │ │  • Infrastructure    │      │
+│  └──────────────────────┘ └──────────────────────┘ └──────────────────────┘      │
+│            │                         │                         │                    │
+│            └─────────────────────────┼─────────────────────────┘                   │
+│                                      │                                             │
+│                                      ▼                                             │
+│  ┌─────────────────────────────────────────────────────────────────────────────┐  │
+│  │                         IMPLEMENTATION SWARMS (Pizza Teams)                  │  │
+│  │                                                                             │  │
+│  │  ┌────────────────┐  ┌────────────────┐  ┌────────────────┐               │  │
+│  │  │ AUTH MODULE    │  │ PAYMENT MODULE │  │ USER INTERFACE │               │  │
+│  │  │ Code Team #1   │  │ Code Team #2   │  │ Code Team #3   │               │  │
+│  │  │                │  │                │  │                │               │  │
+│  │  │ • Feature Dev  │  │ • Feature Dev  │  │ • Feature Dev  │               │  │
+│  │  │ • Unit Tests   │  │ • Unit Tests   │  │ • Unit Tests   │               │  │
+│  │  │ • Code Review  │  │ • Code Review  │  │ • Code Review  │               │  │
+│  │  │ • PR Creation  │  │ • PR Creation  │  │ • PR Creation  │               │  │
+│  │  └────────────────┘  └────────────────┘  └────────────────┘               │  │
+│  │                                                                             │  │
+│  │  ┌────────────────┐  ┌────────────────┐  ┌────────────────┐               │  │
+│  │  │ DATA LAYER     │  │ API GATEWAY    │  │ NOTIFICATIONS  │               │  │
+│  │  │ Code Team #4   │  │ Code Team #5   │  │ Code Team #6   │               │  │
+│  │  │                │  │                │  │                │               │  │
+│  │  │ • Feature Dev  │  │ • Feature Dev  │  │ • Feature Dev  │               │  │
+│  │  │ • Unit Tests   │  │ • Unit Tests   │  │ • Unit Tests   │               │  │
+│  │  │ • Code Review  │  │ • Code Review  │  │ • Code Review  │               │  │
+│  │  │ • PR Creation  │  │ • PR Creation  │  │ • PR Creation  │               │  │
+│  │  └────────────────┘  └────────────────┘  └────────────────┘               │  │
+│  └─────────────────────────────────────────────────────────────────────────────┘  │
+│                                                                                    │
+└──────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Sprint Workflow with Multi-Swarm Coordination
+
+```
+┌──────────────────────────────────────────────────────────────────────────────────────┐
+│                          SPRINT WORKFLOW COORDINATION                                │
+├──────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                      │
+│  Sprint Planning                                                                    │
+│  ┌─────────────┐                                                                   │
+│  │   Define    │──────► Epic/Story Creation                                       │
+│  │   Sprint    │        └──► Task Breakdown                                       │
+│  │    Goals    │             └──► Team Assignment                                 │
+│  └─────────────┘                                                                   │
+│        │                                                                           │
+│        ▼                                                                           │
+│  ┌─────────────────────────────────────────────────────────────────┐              │
+│  │                    ARCHITECTURE REVIEW GATE                      │              │
+│  │  ┌────────────┐  ┌────────────┐  ┌────────────┐                │              │
+│  │  │  Design    │  │   API      │  │  Security  │                │              │
+│  │  │  Document  │──►│   Review   │──►│   Review   │──► Approved?  │              │
+│  │  └────────────┘  └────────────┘  └────────────┘                │              │
+│  └─────────────────────────────────────────────────────────────────┘              │
+│                                │                                                   │
+│                                ▼                                                   │
+│  ┌─────────────────────────────────────────────────────────────────┐              │
+│  │                    IMPLEMENTATION PHASE                          │              │
+│  │                                                                  │              │
+│  │   Code Team #1          Code Team #2          Code Team #N      │              │
+│  │   ┌──────────┐         ┌──────────┐         ┌──────────┐      │              │
+│  │   │ Feature  │         │ Feature  │         │ Feature  │      │              │
+│  │   │   Dev    │         │   Dev    │         │   Dev    │      │              │
+│  │   └────┬─────┘         └────┬─────┘         └────┬─────┘      │              │
+│  │        │                     │                     │            │              │
+│  │        ▼                     ▼                     ▼            │              │
+│  │   ┌──────────┐         ┌──────────┐         ┌──────────┐      │              │
+│  │   │   Unit   │         │   Unit   │         │   Unit   │      │              │
+│  │   │  Testing │         │  Testing │         │  Testing │      │              │
+│  │   └────┬─────┘         └────┬─────┘         └────┬─────┘      │              │
+│  │        │                     │                     │            │              │
+│  │        ▼                     ▼                     ▼            │              │
+│  │   ┌──────────┐         ┌──────────┐         ┌──────────┐      │              │
+│  │   │    PR    │         │    PR    │         │    PR    │      │              │
+│  │   │ Creation │         │ Creation │         │ Creation │      │              │
+│  │   └────┬─────┘         └────┬─────┘         └────┬─────┘      │              │
+│  └────────┼─────────────────────┼─────────────────────┼────────────┘              │
+│           │                     │                     │                           │
+│           └─────────────────────┼─────────────────────┘                           │
+│                                 ▼                                                 │
+│  ┌─────────────────────────────────────────────────────────────────┐              │
+│  │                        QA VALIDATION GATE                        │              │
+│  │  ┌────────────┐  ┌────────────┐  ┌────────────┐                │              │
+│  │  │ Integration│  │ Performance│  │ Acceptance │                │              │
+│  │  │   Tests    │──►│   Tests    │──►│   Tests   │──► Pass?      │              │
+│  │  └────────────┘  └────────────┘  └────────────┘                │              │
+│  └─────────────────────────────────────────────────────────────────┘              │
+│                                │                                                   │
+│                                ▼                                                   │
+│  ┌─────────────────────────────────────────────────────────────────┐              │
+│  │                    DEPLOYMENT PHASE                              │              │
+│  │  ┌────────────┐  ┌────────────┐  ┌────────────┐                │              │
+│  │  │   Merge    │  │   Deploy   │  │  Monitor   │                │              │
+│  │  │    PRs     │──►│  to Prod   │──►│  & Alert  │                │              │
+│  │  └────────────┘  └────────────┘  └────────────┘                │              │
+│  └─────────────────────────────────────────────────────────────────┘              │
+│                                                                                    │
+└──────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Swarm Communication Protocol
+
+```typescript
+interface SwarmCoordinationProtocol {
+  // Swarm Identity
+  swarmId: string;
+  swarmType: 'project-mgmt' | 'architecture' | 'implementation' | 'qa' | 'devops';
+  moduleOwnership: string[];  // Modules this swarm is responsible for
+  
+  // Task Management
+  assignedTasks: Task[];
+  taskStatus: Map<string, TaskStatus>;
+  dependencies: Map<string, string[]>;  // Task dependencies across swarms
+  
+  // Communication Channels
+  channels: {
+    commands: EventEmitter;      // Receive commands from PM swarm
+    status: EventEmitter;        // Report status to PM swarm
+    collaboration: EventEmitter; // Inter-swarm communication
+    approvals: EventEmitter;     // Architecture/QA approval requests
+  };
+  
+  // Approval Gates
+  approvalGates: {
+    architecture?: {
+      required: boolean;
+      status: 'pending' | 'approved' | 'rejected';
+      feedback?: string;
+    };
+    qa?: {
+      required: boolean;
+      status: 'pending' | 'passed' | 'failed';
+      testResults?: TestResults;
+    };
+  };
+  
+  // Work Products
+  pullRequests: PullRequest[];
+  branches: BranchInfo[];
+  artifacts: DeploymentArtifact[];
+}
+
+interface SwarmTask {
+  id: string;
+  swarmId: string;
+  type: 'feature' | 'bug' | 'refactor' | 'test';
+  epic?: string;
+  story?: string;
+  module: string;
+  
+  // Task lifecycle
+  status: 'backlog' | 'design' | 'in-progress' | 'review' | 'testing' | 'done';
+  
+  // Approvals required
+  requiresArchitectureApproval: boolean;
+  requiresQAValidation: boolean;
+  
+  // Work tracking
+  branch?: string;
+  pullRequest?: string;
+  commits: string[];
+  
+  // Inter-swarm dependencies
+  dependsOn: string[];      // Task IDs from other swarms
+  blockedBy: string[];      // Current blockers
+  blocking: string[];       // Tasks this is blocking
+}
+
+interface SwarmOrchestrator {
+  // Swarm registry
+  swarms: Map<string, Swarm>;
+  
+  // Task distribution
+  distributeEpic(epic: Epic): Map<string, Task[]>;
+  assignTaskToSwarm(task: Task, swarmId: string): void;
+  
+  // Coordination
+  coordinateDependencies(tasks: Task[]): DependencyGraph;
+  resolveBlockers(taskId: string): void;
+  
+  // Approval workflow
+  requestArchitectureApproval(design: DesignDoc): Promise<ApprovalResult>;
+  requestQAValidation(pr: PullRequest): Promise<ValidationResult>;
+  
+  // Sprint management
+  planSprint(goals: SprintGoals): SprintPlan;
+  trackSprintProgress(): SprintMetrics;
+  
+  // Communication
+  broadcastToSwarms(message: SwarmMessage): void;
+  routeMessage(from: string, to: string, message: any): void;
+}
+```
+
+### Implementation Example
+
+```typescript
+class ProjectManagementSwarm extends BaseSwarm {
+  private implementationSwarms: Map<string, ImplementationSwarm>;
+  private architectureSwarm: ArchitectureSwarm;
+  private qaSwarm: QASwarm;
+  
+  async planSprint(epic: Epic): Promise<SprintPlan> {
+    // Break down epic into stories and tasks
+    const stories = await this.decomposeEpic(epic);
+    const tasks = await this.createTasksFromStories(stories);
+    
+    // Distribute tasks to appropriate swarms
+    const taskDistribution = new Map<string, Task[]>();
+    
+    for (const task of tasks) {
+      const targetSwarm = this.selectSwarmForTask(task);
+      
+      // Request architecture review if needed
+      if (task.requiresDesign) {
+        const designApproval = await this.architectureSwarm.reviewDesign({
+          task,
+          proposedApproach: task.technicalApproach,
+          impactedModules: task.modules
+        });
+        
+        if (!designApproval.approved) {
+          task.status = 'blocked';
+          task.blockReason = designApproval.feedback;
+          continue;
+        }
+      }
+      
+      // Assign to implementation swarm
+      if (!taskDistribution.has(targetSwarm.id)) {
+        taskDistribution.set(targetSwarm.id, []);
+      }
+      taskDistribution.get(targetSwarm.id)!.push(task);
+    }
+    
+    // Send tasks to swarms
+    for (const [swarmId, swarmTasks] of taskDistribution) {
+      await this.implementationSwarms.get(swarmId)!.assignTasks(swarmTasks);
+    }
+    
+    return {
+      epic,
+      stories,
+      tasks: Array.from(taskDistribution.values()).flat(),
+      swarmAssignments: taskDistribution,
+      timeline: this.calculateTimeline(taskDistribution)
+    };
+  }
+  
+  async monitorProgress(): Promise<SprintProgress> {
+    const progress = new Map<string, SwarmProgress>();
+    
+    // Collect progress from all swarms
+    for (const [swarmId, swarm] of this.implementationSwarms) {
+      const swarmProgress = await swarm.getProgress();
+      progress.set(swarmId, swarmProgress);
+      
+      // Check for blockers
+      if (swarmProgress.blockers.length > 0) {
+        await this.resolveBlockers(swarmProgress.blockers);
+      }
+      
+      // Route completed PRs to QA
+      for (const pr of swarmProgress.completedPRs) {
+        await this.qaSwarm.validatePR(pr);
+      }
+    }
+    
+    return this.aggregateProgress(progress);
+  }
+}
+
+class ImplementationSwarm extends BaseSwarm {
+  private module: string;
+  private developers: Developer[];
+  private activeTasks: Task[];
+  
+  async executeTask(task: Task): Promise<TaskResult> {
+    // Create feature branch
+    const branch = await this.createFeatureBranch(task);
+    
+    // Implement feature
+    const implementation = await this.implementFeature(task, branch);
+    
+    // Run unit tests
+    const testResults = await this.runUnitTests(implementation);
+    
+    if (!testResults.passed) {
+      return { status: 'failed', reason: 'Unit tests failed' };
+    }
+    
+    // Create pull request
+    const pr = await this.createPullRequest({
+      branch,
+      task,
+      description: this.generatePRDescription(task, implementation),
+      reviewers: this.selectReviewers(task)
+    });
+    
+    // Notify PM swarm
+    await this.notifyProjectManagement({
+      event: 'pr-created',
+      task: task.id,
+      pr: pr.url,
+      readyForQA: true
+    });
+    
+    return { status: 'completed', pr };
+  }
+}
+
+class QASwarm extends BaseSwarm {
+  async validatePR(pr: PullRequest): Promise<ValidationResult> {
+    const validationPlan = this.createValidationPlan(pr);
+    
+    // Run integration tests
+    const integrationResults = await this.runIntegrationTests(pr);
+    
+    // Run performance tests if needed
+    let performanceResults;
+    if (validationPlan.requiresPerformanceTest) {
+      performanceResults = await this.runPerformanceTests(pr);
+    }
+    
+    // Run acceptance tests
+    const acceptanceResults = await this.runAcceptanceTests(pr);
+    
+    const allPassed = 
+      integrationResults.passed && 
+      (!performanceResults || performanceResults.passed) && 
+      acceptanceResults.passed;
+    
+    // Report results
+    await this.reportValidationResults({
+      pr,
+      passed: allPassed,
+      integrationTests: integrationResults,
+      performanceTests: performanceResults,
+      acceptanceTests: acceptanceResults
+    });
+    
+    if (allPassed) {
+      await this.approvePR(pr);
+    } else {
+      await this.requestFixes(pr, this.identifyFailures(validationResults));
+    }
+    
+    return { passed: allPassed, results: validationResults };
+  }
+}
+```
+
+### Benefits of Multi-Swarm Architecture
+
+1. **Parallel Development**: Multiple teams work simultaneously on different modules
+2. **Clear Ownership**: Each swarm owns specific modules or features
+3. **Quality Gates**: Architecture review and QA validation ensure quality
+4. **Scalability**: Add more swarms as the project grows
+5. **Specialization**: Teams focus on their expertise area
+6. **Coordination**: PM swarm ensures alignment and dependency management
+
+### Integration with Project Management Platforms
+
+The multi-swarm system integrates with GitHub/Jira through:
+- Automatic issue creation for each swarm task
+- PR linking to issues with swarm metadata
+- Sprint board updates reflecting swarm progress
+- Custom fields for swarm assignment and dependencies
+- Webhook notifications for cross-swarm events
