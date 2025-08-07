@@ -25,10 +25,18 @@ export function createEnhancedClaudeMd() {
   return template;
 }
 
-export function createEnhancedSettingsJson() {
+export function createEnhancedSettingsJson(options = {}) {
   const template = loadTemplate('settings.json');
   if (!template) {
-    return createEnhancedSettingsJsonFallback();
+    return createEnhancedSettingsJsonFallback(options);
+  }
+  // If template exists but we need to modify checkpoints setting
+  if (options.disableCheckpoints) {
+    const settings = JSON.parse(template);
+    if (settings.env) {
+      settings.env.CLAUDE_FLOW_CHECKPOINTS_ENABLED = 'false';
+    }
+    return JSON.stringify(settings, null, 2);
   }
   return template;
 }
@@ -1946,7 +1954,8 @@ See full documentation in \`.claude/commands/\`
   }
 }
 
-function createEnhancedSettingsJsonFallback() {
+function createEnhancedSettingsJsonFallback(options = {}) {
+  const { disableCheckpoints = false } = options;
   return JSON.stringify(
     {
       env: {
@@ -1955,7 +1964,7 @@ function createEnhancedSettingsJsonFallback() {
         CLAUDE_FLOW_HOOKS_ENABLED: 'true',
         CLAUDE_FLOW_TELEMETRY_ENABLED: 'true',
         CLAUDE_FLOW_REMOTE_EXECUTION: 'true',
-        CLAUDE_FLOW_CHECKPOINTS_ENABLED: 'true',
+        CLAUDE_FLOW_CHECKPOINTS_ENABLED: disableCheckpoints ? 'false' : 'true',
       },
       permissions: {
         allow: [

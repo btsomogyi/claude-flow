@@ -178,6 +178,7 @@ export async function initCommand(subArgs, flags) {
   const initDryRun = subArgs.includes('--dry-run') || subArgs.includes('-d') || flags.dryRun;
   const initOptimized = initSparc && initForce; // Use optimized templates when both flags are present
   const selectedModes = flags.modes ? flags.modes.split(',') : null; // Support selective mode initialization
+  const disableCheckpoints = subArgs.includes('--no-checkpoints') || flags.noCheckpoints || false; // Add checkpoint control
 
   // Get the actual working directory (where the command was run from)
   // Use PWD environment variable which preserves the original directory
@@ -1067,10 +1068,16 @@ async function enhancedClaudeFlowInit(flags, subArgs = []) {
 
     // Create settings.json
     if (!dryRun) {
-      await fs.writeFile(`${claudeDir}/settings.json`, createEnhancedSettingsJson(), 'utf8');
+      await fs.writeFile(`${claudeDir}/settings.json`, createEnhancedSettingsJson({ disableCheckpoints }), 'utf8');
       printSuccess('✓ Created .claude/settings.json with hooks and MCP configuration');
+      if (disableCheckpoints) {
+        printWarning('⚠️  Checkpoints are disabled (--no-checkpoints flag)');
+      }
     } else {
       console.log('[DRY RUN] Would create .claude/settings.json');
+      if (disableCheckpoints) {
+        console.log('[DRY RUN] Checkpoints would be disabled');
+      }
     }
 
     // Create settings.local.json with default MCP permissions
