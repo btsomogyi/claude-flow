@@ -1068,10 +1068,16 @@ async function enhancedClaudeFlowInit(flags, subArgs = []) {
 
     // Create settings.json
     if (!dryRun) {
-      await fs.writeFile(`${claudeDir}/settings.json`, createEnhancedSettingsJson(), 'utf8');
+      await fs.writeFile(`${claudeDir}/settings.json`, createEnhancedSettingsJson({ disableCheckpoints }), 'utf8');
       printSuccess('✓ Created .claude/settings.json with hooks and MCP configuration');
+      if (disableCheckpoints) {
+        printWarning('⚠️  Checkpoints are disabled (--no-checkpoints flag)');
+      }
     } else {
       console.log('[DRY RUN] Would create .claude/settings.json');
+      if (disableCheckpoints) {
+        console.log('[DRY RUN] Checkpoints would be disabled');
+      }
     }
 
     // Create settings.local.json with default MCP permissions
