@@ -12,6 +12,7 @@ export function showInitHelp() {
   console.log('Standard Options:');
   console.log('  --force, -f          Overwrite existing files (also updates .gitignore)');
   console.log('  --dry-run, -d        Preview what would be created without making changes');
+  console.log('  --no-checkpoints     Disable automatic git checkpointing');
   console.log('  --help, -h           Show this help message');
   console.log();
   console.log('Alternative Initialization Modes:');
