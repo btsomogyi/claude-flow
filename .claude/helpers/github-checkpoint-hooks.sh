@@ -101,6 +101,11 @@ EOF
 
 # Function to handle task checkpoints with GitHub release
 task_checkpoint() {
+    # Check if checkpoints are disabled
+    if [ "${CLAUDE_FLOW_CHECKPOINTS_ENABLED:-true}" = "false" ]; then
+        return 0
+    fi
+
     local user_prompt="$1"
     local task=$(echo "$user_prompt" | head -c 100 | tr '\n' ' ')
     
@@ -149,6 +154,11 @@ EOF
 
 # Function to handle session end with GitHub summary
 session_end_checkpoint() {
+    # Check if checkpoints are disabled
+    if [ "${CLAUDE_FLOW_CHECKPOINTS_ENABLED:-true}" = "false" ]; then
+        return 0
+    fi
+
     local session_id="session-$(date +%Y%m%d-%H%M%S)"
     local summary_file=".claude/checkpoints/summary-$session_id.md"
     
