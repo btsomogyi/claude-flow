@@ -1,6 +1,12 @@
 #!/bin/bash
 # Standard checkpoint hook functions for Claude settings.json (without GitHub features)
 
+# Check if checkpoints are enabled
+if [ "${CLAUDE_FLOW_CHECKPOINTS_ENABLED:-true}" = "false" ]; then
+    echo "ℹ️  Checkpoints disabled (CLAUDE_FLOW_CHECKPOINTS_ENABLED=false)"
+    exit 0
+fi
+
 # Function to handle pre-edit checkpoints
 pre_edit_checkpoint() {
     local tool_input="$1"
@@ -36,6 +42,11 @@ EOF
 
 # Function to handle post-edit checkpoints
 post_edit_checkpoint() {
+    # Check if checkpoints are disabled
+    if [ "${CLAUDE_FLOW_CHECKPOINTS_ENABLED:-true}" = "false" ]; then
+        return 0
+    fi
+
     local tool_input="$1"
     local file=$(echo "$tool_input" | jq -r '.file_path // empty')
     
@@ -90,6 +101,11 @@ EOF
 
 # Function to handle task checkpoints
 task_checkpoint() {
+    # Check if checkpoints are disabled
+    if [ "${CLAUDE_FLOW_CHECKPOINTS_ENABLED:-true}" = "false" ]; then
+        return 0
+    fi
+
     local user_prompt="$1"
     local task=$(echo "$user_prompt" | head -c 100 | tr '\n' ' ')
     
@@ -117,6 +133,11 @@ EOF
 
 # Function to handle session end
 session_end_checkpoint() {
+    # Check if checkpoints are disabled
+    if [ "${CLAUDE_FLOW_CHECKPOINTS_ENABLED:-true}" = "false" ]; then
+        return 0
+    fi
+
     local session_id="session-$(date +%Y%m%d-%H%M%S)"
     local summary_file=".claude/checkpoints/summary-$session_id.md"
     
