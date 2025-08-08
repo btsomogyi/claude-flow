@@ -1,0 +1,2 @@
+Test file for checkpoint functionality
+This file is used to test if the pre-edit hook respects CLAUDE_FLOW_CHECKPOINTS_ENABLED parameter.
