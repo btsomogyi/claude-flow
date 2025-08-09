@@ -1,0 +1,1 @@
+{"checkpoint": "task-20250809-052251", "task": "just fix the .claude/helpers/session-manager.sh print_sessions() function which is generating this e", "timestamp": "2025-08-09T09:22:51Z", "commit": "d1284e22b8223748cce449fc232c5699c33c4e04", "github_release": "true"}

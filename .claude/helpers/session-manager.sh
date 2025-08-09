@@ -23,8 +23,8 @@ print_sessions() {
     return 1
   else
     echo -e "${CYAN}Active sessions:${NC}"
-    echo -e "${CYAN}${'%-30s %-s' 'SESSION ID' 'OBJECTIVE'}${NC}"
-    echo -e "${CYAN}$(printf '%-30s %-s' '----------' '---------')${NC}"
+    printf "${CYAN}%-30s %-s${NC}\n" "SESSION ID" "OBJECTIVE"
+    printf "${CYAN}%-30s %-s${NC}\n" "----------" "---------"
     
     for session_id in $sessions; do
       # Try to get objective from hive-mind status
