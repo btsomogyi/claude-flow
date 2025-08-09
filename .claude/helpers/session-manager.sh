@@ -23,7 +23,30 @@ print_sessions() {
     return 1
   else
     echo -e "${CYAN}Active sessions:${NC}"
-    echo -e "${BLUE}$sessions${NC}"
+    echo -e "${CYAN}${'%-30s %-s' 'SESSION ID' 'OBJECTIVE'}${NC}"
+    echo -e "${CYAN}$(printf '%-30s %-s' '----------' '---------')${NC}"
+    
+    for session_id in $sessions; do
+      # Try to get objective from hive-mind status
+      objective=$(claude-flow hive-mind status "$session_id" 2>/dev/null | grep -i "objective\|goal\|task" | head -1 | sed 's/.*[Oo]bjective[: ]*//; s/.*[Gg]oal[: ]*//; s/.*[Tt]ask[: ]*//' | cut -c1-50)
+      
+      # If no objective found from status, try memory
+      if [[ -z "$objective" ]]; then
+        objective=$(claude-flow memory retrieve "hive/objective" --session-id "$session_id" 2>/dev/null | head -1 | cut -c1-50)
+      fi
+      
+      # If still no objective, try checkpoint files
+      if [[ -z "$objective" ]]; then
+        objective=$(find .claude/checkpoints -name "task-*.json" -newer <(date -d '1 hour ago' '+%Y-%m-%d %H:%M:%S') 2>/dev/null | xargs grep -l "$session_id" 2>/dev/null | head -1 | xargs jq -r '.task // empty' 2>/dev/null | cut -c1-50)
+      fi
+      
+      # Default if no objective found
+      if [[ -z "$objective" ]]; then
+        objective="No objective found"
+      fi
+      
+      printf "${BLUE}%-30s${NC} ${GREEN}%s${NC}\n" "$session_id" "$objective"
+    done
     return 0
   fi
 }
