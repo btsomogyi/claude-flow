@@ -17,9 +17,9 @@ log() {
 print_sessions() {
   log "Listing active sessions..."
   
-  # Get full hive-mind status output to parse session IDs with their objectives
+  # Get full hive-mind status output to parse swarm IDs with their objectives
   full_status=$(claude-flow hive-mind status 2>/dev/null)
-  sessions=$(echo "$full_status" | grep -Eo 'session-[0-9]+-[a-zA-Z0-9]+')
+  sessions=$(echo "$full_status" | grep -Eo 'swarm-[0-9]+-[a-zA-Z0-9]+')
   
   if [[ -z "$sessions" ]]; then
     echo -e "${YELLOW}No sessions found.${NC}"
@@ -36,15 +36,9 @@ print_sessions() {
     # Parse the full status output to extract objectives for each session
     current_session=""
     while IFS= read -r line; do
-      if [[ "$line" =~ (session-[0-9]+-[a-zA-Z0-9]+) ]]; then
+      if [[ "$line" =~ ID:[[:space:]]*(swarm-[0-9]+-[a-zA-Z0-9]+) ]]; then
         current_session="${BASH_REMATCH[1]}"
-      elif [[ -n "$current_session" && "$line" =~ [Oo]bjective[[:space:]]*:[[:space:]]*(.+) ]]; then
-        session_objectives["$current_session"]="${BASH_REMATCH[1]}"
-        current_session=""
-      elif [[ -n "$current_session" && "$line" =~ [Gg]oal[[:space:]]*:[[:space:]]*(.+) ]]; then
-        session_objectives["$current_session"]="${BASH_REMATCH[1]}"
-        current_session=""
-      elif [[ -n "$current_session" && "$line" =~ [Tt]ask[[:space:]]*:[[:space:]]*(.+) ]]; then
+      elif [[ -n "$current_session" && "$line" =~ Objective:[[:space:]]*(.+) ]]; then
         session_objectives["$current_session"]="${BASH_REMATCH[1]}"
         current_session=""
       fi
