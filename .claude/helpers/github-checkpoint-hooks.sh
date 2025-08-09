@@ -162,6 +162,12 @@ EOF
 
 # Function to handle session end with GitHub summary
 session_end_checkpoint() {
+    # Check if checkpoints are enabled
+    if [ "$CLAUDE_FLOW_CHECKPOINTS_ENABLED" != "true" ]; then
+        echo "ℹ️  Session end checkpoints disabled (CLAUDE_FLOW_CHECKPOINTS_ENABLED=false)"
+        return 0
+    fi
+    
     local session_id="session-$(date +%Y%m%d-%H%M%S)"
     local summary_file=".claude/checkpoints/summary-$session_id.md"
     
