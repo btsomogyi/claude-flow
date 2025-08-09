@@ -109,6 +109,14 @@ task_checkpoint() {
     local user_prompt="$1"
     local task=$(echo "$user_prompt" | head -c 100 | tr '\n' ' ')
     
+    # Check if checkpoints are enabled
+    if [ "$CLAUDE_FLOW_CHECKPOINTS_ENABLED" != "true" ]; then
+        if [ -n "$task" ]; then
+            echo "ℹ️  Checkpoints disabled (CLAUDE_FLOW_CHECKPOINTS_ENABLED=false)"
+        fi
+        return 0
+    fi
+    
     if [ -n "$task" ]; then
         local checkpoint_name="task-$(date +%Y%m%d-%H%M%S)"
         
