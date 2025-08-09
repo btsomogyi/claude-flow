@@ -34,16 +34,17 @@ print_sessions() {
     declare -A session_objectives
     
     # Parse the full status output to extract objectives for each session
+    current_session=""
     while IFS= read -r line; do
       if [[ "$line" =~ (session-[0-9]+-[a-zA-Z0-9]+) ]]; then
         current_session="${BASH_REMATCH[1]}"
-      elif [[ -n "$current_session" && "$line" =~ [Oo]bjective[: ]*(.+) ]]; then
+      elif [[ -n "$current_session" && "$line" =~ [Oo]bjective[[:space:]]*:[[:space:]]*(.+) ]]; then
         session_objectives["$current_session"]="${BASH_REMATCH[1]}"
         current_session=""
-      elif [[ -n "$current_session" && "$line" =~ [Gg]oal[: ]*(.+) ]]; then
+      elif [[ -n "$current_session" && "$line" =~ [Gg]oal[[:space:]]*:[[:space:]]*(.+) ]]; then
         session_objectives["$current_session"]="${BASH_REMATCH[1]}"
         current_session=""
-      elif [[ -n "$current_session" && "$line" =~ [Tt]ask[: ]*(.+) ]]; then
+      elif [[ -n "$current_session" && "$line" =~ [Tt]ask[[:space:]]*:[[:space:]]*(.+) ]]; then
         session_objectives["$current_session"]="${BASH_REMATCH[1]}"
         current_session=""
       fi
