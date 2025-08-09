@@ -1177,6 +1177,14 @@ pre_edit_checkpoint() {
     local tool_input="$1"
     local file=$(echo "$tool_input" | jq -r '.file_path // empty')
     
+    # Check if checkpoints are enabled
+    if [ "$CLAUDE_FLOW_CHECKPOINTS_ENABLED" != "true" ]; then
+        if [ -n "$file" ]; then
+            echo "ℹ️  Checkpoints disabled (CLAUDE_FLOW_CHECKPOINTS_ENABLED=false)"
+        fi
+        return 0
+    fi
+    
     if [ -n "$file" ]; then
         local checkpoint_branch="checkpoint/pre-edit-$(date +%Y%m%d-%H%M%S)"
         local current_branch=$(git branch --show-current)
@@ -1610,6 +1618,14 @@ esac
 pre_edit_checkpoint() {
     local tool_input="$1"
     local file=$(echo "$tool_input" | jq -r '.file_path // empty')
+    
+    # Check if checkpoints are enabled
+    if [ "$CLAUDE_FLOW_CHECKPOINTS_ENABLED" != "true" ]; then
+        if [ -n "$file" ]; then
+            echo "ℹ️  Checkpoints disabled (CLAUDE_FLOW_CHECKPOINTS_ENABLED=false)"
+        fi
+        return 0
+    fi
     
     if [ -n "$file" ]; then
         local checkpoint_branch="checkpoint/pre-edit-$(date +%Y%m%d-%H%M%S)"
