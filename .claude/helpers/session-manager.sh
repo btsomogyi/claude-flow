@@ -16,7 +16,11 @@ log() {
 
 print_sessions() {
   log "Listing active sessions..."
-  sessions=$(claude-flow hive-mind sessions | grep -Eo 'session-[0-9]+-[a-zA-Z0-9]+')
+  
+  # Get full hive-mind status output to parse session IDs with their objectives
+  full_status=$(claude-flow hive-mind status 2>/dev/null)
+  sessions=$(echo "$full_status" | grep -Eo 'session-[0-9]+-[a-zA-Z0-9]+')
+  
   if [[ -z "$sessions" ]]; then
     echo -e "${YELLOW}No sessions found.${NC}"
     log "No sessions found."
@@ -26,12 +30,27 @@ print_sessions() {
     printf "${CYAN}%-30s %-s${NC}\n" "SESSION ID" "OBJECTIVE"
     printf "${CYAN}%-30s %-s${NC}\n" "----------" "---------"
     
+    # Create associative array to store session objectives
+    declare -A session_objectives
+    
+    # Parse the full status output to extract objectives for each session
+    while IFS= read -r line; do
+      if [[ "$line" =~ (session-[0-9]+-[a-zA-Z0-9]+) ]]; then
+        current_session="${BASH_REMATCH[1]}"
+      elif [[ -n "$current_session" && "$line" =~ [Oo]bjective[: ]*(.+) ]]; then
+        session_objectives["$current_session"]="${BASH_REMATCH[1]}"
+        current_session=""
+      elif [[ -n "$current_session" && "$line" =~ [Gg]oal[: ]*(.+) ]]; then
+        session_objectives["$current_session"]="${BASH_REMATCH[1]}"
+        current_session=""
+      elif [[ -n "$current_session" && "$line" =~ [Tt]ask[: ]*(.+) ]]; then
+        session_objectives["$current_session"]="${BASH_REMATCH[1]}"
+        current_session=""
+      fi
+    done <<< "$full_status"
+    
     for session_id in $sessions; do
-      # Clear objective for each session
-      objective=""
-      
-      # Try to get objective from hive-mind status
-      objective=$(claude-flow hive-mind status "$session_id" 2>/dev/null | grep -i "objective\|goal\|task" | head -1 | sed 's/.*[Oo]bjective[: ]*//; s/.*[Gg]oal[: ]*//; s/.*[Tt]ask[: ]*//' | cut -c1-50)
+      objective="${session_objectives[$session_id]}"
       
       # If no objective found from status, try memory
       if [[ -z "$objective" ]]; then
@@ -47,6 +66,9 @@ print_sessions() {
       if [[ -z "$objective" ]]; then
         objective="No objective found"
       fi
+      
+      # Truncate objective to 50 characters
+      objective=$(echo "$objective" | cut -c1-50)
       
       printf "${BLUE}%-30s${NC} ${GREEN}%s${NC}\n" "$session_id" "$objective"
     done
