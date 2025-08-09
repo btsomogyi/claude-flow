@@ -123,26 +123,26 @@ stop_one_session() {
   done
 }
 
-#trap 'echo -e "${RED}\nScript terminated.${NC}"; log "Script terminated by user or error."; exit 1' SIGINT SIGTERM
-#
-#while true; do
-#  echo -e "\n${CYAN}=== Claude-Flow Hive-Mind Session Manager ===${NC}"
-#  echo -e "${BLUE}1. Print active sessions${NC}"
-#  echo -e "${BLUE}2. Stop ALL sessions${NC}"
-#  echo -e "${BLUE}3. Stop ONE session (choose ID)${NC}"
-#  echo -e "${BLUE}4. Exit${NC}"
-#  echo -e "${CYAN}============================================${NC}"
-#  read -rp "$(echo -e "${YELLOW}Enter your choice [1-4]: ${NC}")" choice
-#
-#  case $choice in
-#    1) print_sessions ;;
-#    2) stop_all_sessions ;;
-#    3) stop_one_session ;;
-#    4)
-#      echo -e "${GREEN}Exiting. Goodbye!${NC}"
-#      log "Exiting. Goodbye!"
-#      exit 0
-#      ;;
-#    *) echo -e "${RED}Invalid choice. Please enter 1, 2, 3, or 4.${NC}" ;;
-#  esac
-#done
+trap 'echo -e "${RED}\nScript terminated.${NC}"; log "Script terminated by user or error."; exit 1' SIGINT SIGTERM
+
+while true; do
+  echo -e "\n${CYAN}=== Claude-Flow Hive-Mind Session Manager ===${NC}"
+  echo -e "${BLUE}1. Print active sessions${NC}"
+  echo -e "${BLUE}2. Stop ALL sessions${NC}"
+  echo -e "${BLUE}3. Stop ONE session (choose ID)${NC}"
+  echo -e "${BLUE}4. Exit${NC}"
+  echo -e "${CYAN}============================================${NC}"
+  read -rp "$(echo -e "${YELLOW}Enter your choice [1-4]: ${NC}")" choice
+
+  case $choice in
+    1) print_sessions ;;
+    2) stop_all_sessions ;;
+    3) stop_one_session ;;
+    4)
+      echo -e "${GREEN}Exiting. Goodbye!${NC}"
+      log "Exiting. Goodbye!"
+      exit 0
+      ;;
+    *) echo -e "${RED}Invalid choice. Please enter 1, 2, 3, or 4.${NC}" ;;
+  esac
+done
