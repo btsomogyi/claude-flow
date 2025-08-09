@@ -76,7 +76,7 @@
           },
           {
             "type": "command",
-            "command": "/bin/bash -c 'FILE=$(cat | jq -r \".tool_input.file_path // .tool_input.path // empty\"); if [ -n \"$FILE\" ] && [ \"$CLAUDE_FLOW_CHECKPOINTS_ENABLED\" = \"true\" ]; then CHECKPOINT_BRANCH=\"checkpoint/pre-edit-$(date +%Y%m%d-%H%M%S)\"; git add -A && git stash push -m \"Pre-edit checkpoint for $FILE\" >/dev/null 2>&1 && git branch \"$CHECKPOINT_BRANCH\" && mkdir -p .claude/checkpoints && echo \"{\\\"branch\\\": \\\"$CHECKPOINT_BRANCH\\\", \\\"file\\\": \\\"$FILE\\\", \\\"timestamp\\\": \\\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\\\", \\\"type\\\": \\\"pre-edit\\\", \\\"original_branch\\\": \\\"$(git branch --show-current)\\\"}\" > \".claude/checkpoints/$(date +%s).json\" && git stash pop --quiet >/dev/null 2>&1 || true && echo \"✅ Created checkpoint: $CHECKPOINT_BRANCH for $FILE\"; elif [ -n \"$FILE\" ]; then echo \"ℹ️  Checkpoints disabled (CLAUDE_FLOW_CHECKPOINTS_ENABLED=false)\"; fi'"
+            "command": "/bin/bash -c 'FILE=$(cat | jq -r \".tool_input.file_path // .tool_input.path // empty\"); if [ -n \"$FILE\" ]; then CHECKPOINT_BRANCH=\"checkpoint/pre-edit-$(date +%Y%m%d-%H%M%S)\"; git add -A && git stash push -m \"Pre-edit checkpoint for $FILE\" >/dev/null 2>&1 && git branch \"$CHECKPOINT_BRANCH\" && mkdir -p .claude/checkpoints && echo \"{\\\"branch\\\": \\\"$CHECKPOINT_BRANCH\\\", \\\"file\\\": \\\"$FILE\\\", \\\"timestamp\\\": \\\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\\\", \\\"type\\\": \\\"pre-edit\\\", \\\"original_branch\\\": \\\"$(git branch --show-current)\\\"}\" > \".claude/checkpoints/$(date +%s).json\" && git stash pop --quiet >/dev/null 2>&1 || true && echo \"✅ Created checkpoint: $CHECKPOINT_BRANCH for $FILE\"; fi'"
           }
         ]
       }
