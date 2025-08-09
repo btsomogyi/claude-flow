@@ -41,6 +41,11 @@ EOF
 
 # Function to handle post-edit checkpoints with GitHub release
 post_edit_checkpoint() {
+    if [ "$CLAUDE_FLOW_CHECKPOINTS_ENABLED" != "true" ]; then
+        echo "ℹ️ Checkpoints disabled (CLAUDE_FLOW_CHECKPOINTS_ENABLED=false)"
+        return 0
+    fi
+    
     local tool_input="$1"
     local file=$(echo "$tool_input" | jq -r '.file_path // empty')
     
