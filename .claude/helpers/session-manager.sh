@@ -27,6 +27,9 @@ print_sessions() {
     printf "${CYAN}%-30s %-s${NC}\n" "----------" "---------"
     
     for session_id in $sessions; do
+      # Clear objective for each session
+      objective=""
+      
       # Try to get objective from hive-mind status
       objective=$(claude-flow hive-mind status "$session_id" 2>/dev/null | grep -i "objective\|goal\|task" | head -1 | sed 's/.*[Oo]bjective[: ]*//; s/.*[Gg]oal[: ]*//; s/.*[Tt]ask[: ]*//' | cut -c1-50)
       
