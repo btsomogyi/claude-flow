@@ -48,7 +48,7 @@ print_sessions() {
       objective="${session_objectives[$session_id]}"
       
       # If no objective found from status, try memory
-      if [[ -z "$objective" ]]; then
+    if [[ -z "$objective" ]]; then
         objective=$(claude-flow memory retrieve "hive/objective" --session-id "$session_id" 2>/dev/null | head -1 | cut -c1-50)
       fi
       
