@@ -6,6 +6,14 @@ pre_edit_checkpoint() {
     local tool_input="$1"
     local file=$(echo "$tool_input" | jq -r '.file_path // empty')
     
+    # Check if checkpoints are enabled
+    if [ "$CLAUDE_FLOW_CHECKPOINTS_ENABLED" != "true" ]; then
+        if [ -n "$file" ]; then
+            echo "ℹ️  Checkpoints disabled (CLAUDE_FLOW_CHECKPOINTS_ENABLED=false)"
+        fi
+        return 0
+    fi
+    
     if [ -n "$file" ]; then
         local checkpoint_branch="checkpoint/pre-edit-$(date +%Y%m%d-%H%M%S)"
         local current_branch=$(git branch --show-current)
@@ -38,6 +46,14 @@ EOF
 post_edit_checkpoint() {
     local tool_input="$1"
     local file=$(echo "$tool_input" | jq -r '.file_path // empty')
+    
+    # Check if checkpoints are enabled
+    if [ "$CLAUDE_FLOW_CHECKPOINTS_ENABLED" != "true" ]; then
+        if [ -n "$file" ] && [ -f "$file" ]; then
+            echo "ℹ️  Checkpoints disabled (CLAUDE_FLOW_CHECKPOINTS_ENABLED=false)"
+        fi
+        return 0
+    fi
     
     if [ -n "$file" ] && [ -f "$file" ]; then
         # Check if file was modified - first check if file is tracked
@@ -93,6 +109,14 @@ task_checkpoint() {
     local user_prompt="$1"
     local task=$(echo "$user_prompt" | head -c 100 | tr '\n' ' ')
     
+    # Check if checkpoints are enabled
+    if [ "$CLAUDE_FLOW_CHECKPOINTS_ENABLED" != "true" ]; then
+        if [ -n "$task" ]; then
+            echo "ℹ️  Checkpoints disabled (CLAUDE_FLOW_CHECKPOINTS_ENABLED=false)"
+        fi
+        return 0
+    fi
+    
     if [ -n "$task" ]; then
         local checkpoint_name="task-$(date +%Y%m%d-%H%M%S)"
         
@@ -117,6 +141,12 @@ EOF
 
 # Function to handle session end
 session_end_checkpoint() {
+    # Check if checkpoints are enabled
+    if [ "$CLAUDE_FLOW_CHECKPOINTS_ENABLED" != "true" ]; then
+        echo "ℹ️  Session end checkpoints disabled (CLAUDE_FLOW_CHECKPOINTS_ENABLED=false)"
+        return 0
+    fi
+    
     local session_id="session-$(date +%Y%m%d-%H%M%S)"
     local summary_file=".claude/checkpoints/summary-$session_id.md"
     
