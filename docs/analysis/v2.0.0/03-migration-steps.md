@@ -316,26 +316,71 @@ export const errors = WebCompatErrors;
 
 ## Phase 2: Core File Migration (Days 2-4)
 
-### Step 2.1: Update Runtime Detection
-**File**: `src/cli/runtime-detector.js`
+### Step 2.1: Update Runtime Detection to WebAPI-first
+**File**: `src/cli/runtime-detector.js` → `src/utils/runtime-adapter.ts`
 
-Replace Deno-specific code:
-```javascript
-// Remove all Deno references
-const isNode = true;
-const isDeno = false;
-const runtime = 'node';
+Replace with modern feature-based detection:
+```typescript
+// Modern runtime adapter using WebAPIs + Node ESM
+import process from 'node:process';
 
-// Update all conditionals
-if (runtime === 'node') {
-  // Use Node.js APIs directly
-  stdin = process.stdin;
-  stdout = process.stdout;
-  stderr = process.stderr;
-  exit = process.exit;
-  pid = process.pid;
-  addSignalListener = (signal, handler) => process.on(signal, handler);
-}
+// Feature detection instead of runtime detection
+export const detectFeatures = async () => {
+  const features = {
+    nodeFS: await hasNodeFS(),
+    webStreams: hasWebStreams(),
+    textEncoder: typeof TextEncoder !== 'undefined',
+    process: typeof globalThis.process !== 'undefined',
+    webAPIs: hasWebAPIs()
+  };
+  
+  return features;
+};
+
+const hasNodeFS = async () => {
+  try {
+    await import('node:fs/promises');
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const hasWebStreams = () => {
+  return typeof ReadableStream !== 'undefined' && 
+         typeof WritableStream !== 'undefined';
+};
+
+const hasWebAPIs = () => {
+  return typeof TextEncoder !== 'undefined' &&
+         typeof TextDecoder !== 'undefined' &&
+         typeof AbortController !== 'undefined';
+};
+
+// Runtime-agnostic adapter
+export const createRuntimeAdapter = async () => {
+  const features = await detectFeatures();
+  
+  return {
+    features,
+    // Always prefer WebAPIs when available
+    fs: features.nodeFS ? await import('node:fs/promises') : null,
+    process: features.process ? globalThis.process : null,
+    streams: features.webStreams ? {
+      ReadableStream: globalThis.ReadableStream,
+      WritableStream: globalThis.WritableStream
+    } : null,
+    
+    // Platform information
+    platform: {
+      os: process.platform === 'win32' ? 'windows' : 
+          process.platform === 'darwin' ? 'darwin' :
+          process.platform === 'linux' ? 'linux' : process.platform,
+      arch: process.arch,
+      target: `${process.arch}-${process.platform}`
+    }
+  };
+};
 ```
 
 ### Step 2.2: Migrate CLI Entry Points
