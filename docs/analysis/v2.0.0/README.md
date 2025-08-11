@@ -145,19 +145,20 @@ Start with: `03-migration-steps.md`
 ## Success Metrics
 
 ### Functional Metrics
-- 100% CLI command functionality preserved
+- 100% CLI command functionality preserved with WebAPI patterns
 - Zero regression in user-facing behavior
-- All platforms (Windows, macOS, Linux) working
+- Cross-runtime compatibility (Node.js, Bun, future runtimes)
 
 ### Performance Metrics  
-- CLI startup time ≤ 10% slower (acceptable trade-off)
-- Memory usage reduction (no dual runtime overhead)
-- File operation throughput maintained
+- CLI startup time improved with ESM tree-shaking
+- Memory usage optimized with native WebAPI implementations
+- File operation throughput enhanced with direct `node:*` imports
 
 ### Quality Metrics
-- Code coverage ≥ 85%
+- WebAPI compliance score ≥ 95%
 - Zero Deno API references in `/src`
-- All tests passing across environments
+- TypeScript strict mode compatibility
+- All tests passing across runtime environments
 
 ## Risk Management
 
