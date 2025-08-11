@@ -21,7 +21,7 @@ describe('CLI Basic Tests', () => {
   });
 
   test('should verify package.json version', () => {
-    expect(packageJson.version).toBe('2.0.0-alpha.54');
+    expect(packageJson.version).toBe('2.0.0-alpha.88');
     expect(packageJson.name).toBe('claude-flow');
   });
 });
