@@ -230,7 +230,7 @@ async function createSwarmWizard() {
   }
 
   // Create swarm
-  const ora = require('ora'); const spinner = ora('Creating Hive Mind swarm...').start();
+  const spinner = ora('Creating Hive Mind swarm...').start();
 
   try {
     const hiveMind = new HiveMind({
