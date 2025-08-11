@@ -65,9 +65,9 @@ Start with: `05-comprehensive-removal-plan.md`
 
 ### For Developers
 Start with: `02-api-mapping-guide.md`
-- See exact code transformations needed
-- Understand Node.js equivalent patterns
-- Review testing approaches
+- See exact WebAPI + ESM transformations needed
+- Understand modern standards-compliant patterns  
+- Review cross-runtime testing approaches
 
 ### For DevOps/QA
 Start with: `03-migration-steps.md`
