@@ -178,64 +178,87 @@ export class Command {
 }
 ```
 
-### Step 1.2: Create Command Execution Helper
-**New File**: `src/utils/command-executor.js`
+### Step 1.2: Create WebStreams I/O Helper  
+**New File**: `src/utils/webstreams-io.ts`
 
-```javascript
-import { spawn } from 'child_process';
+```typescript
+// WebStreams API compatible I/O operations
+import process from 'node:process';
 
-export class CommandExecutor {
-  constructor(command, options = {}) {
-    this.command = command;
-    this.options = options;
-  }
+export class WebStreamIO {
+  private encoder = new TextEncoder();
+  private decoder = new TextDecoder();
 
-  async output() {
-    return new Promise((resolve, reject) => {
-      const child = spawn(this.command, this.options.args || [], {
-        cwd: this.options.cwd,
-        env: this.options.env || process.env,
-        stdio: ['pipe', 'pipe', 'pipe']
-      });
-
-      let stdout = [];
-      let stderr = [];
-
-      child.stdout.on('data', data => stdout.push(data));
-      child.stderr.on('data', data => stderr.push(data));
-
-      child.on('close', code => {
-        resolve({
-          code,
-          success: code === 0,
-          stdout: Buffer.concat(stdout),
-          stderr: Buffer.concat(stderr)
+  // Stdout as WebAPI WritableStream
+  get stdout(): WritableStream<Uint8Array> {
+    return new WritableStream({
+      write: async (chunk) => {
+        return new Promise((resolve, reject) => {
+          process.stdout.write(chunk, (err) => {
+            if (err) reject(err);
+            else resolve();
+          });
         });
-      });
-
-      child.on('error', reject);
+      }
     });
   }
 
-  spawn() {
-    const child = spawn(this.command, this.options.args || [], {
-      cwd: this.options.cwd,
-      env: this.options.env || process.env,
-      stdio: this.options.stdio || 'inherit'
-    });
-
-    return {
-      status: new Promise(resolve => {
-        child.on('close', code => {
-          resolve({ code, success: code === 0 });
+  // Stdin as WebAPI ReadableStream  
+  get stdin(): ReadableStream<Uint8Array> {
+    return new ReadableStream({
+      start(controller) {
+        process.stdin.on('data', (chunk) => {
+          controller.enqueue(new Uint8Array(chunk));
         });
-      }),
-      stdout: child.stdout,
-      stderr: child.stderr,
-      kill: signal => child.kill(signal)
-    };
+
+        process.stdin.on('end', () => {
+          controller.close();
+        });
+
+        process.stdin.on('error', (err) => {
+          controller.error(err);
+        });
+      }
+    });
+  }
+
+  // Simplified write method
+  async writeStdout(data: string | Uint8Array): Promise<void> {
+    const writer = this.stdout.getWriter();
+    try {
+      const chunk = typeof data === 'string' ? this.encoder.encode(data) : data;
+      await writer.write(chunk);
+    } finally {
+      writer.releaseLock();
+    }
+  }
+
+  // Simplified read method
+  async readStdin(buffer: Uint8Array): Promise<number> {
+    const reader = this.stdin.getReader();
+    try {
+      const { done, value } = await reader.read();
+      if (done) return 0;
+      
+      const bytesToCopy = Math.min(value.length, buffer.length);
+      buffer.set(value.slice(0, bytesToCopy));
+      return bytesToCopy;
+    } finally {
+      reader.releaseLock();
+    }
   }
 }
+
+// Simplified direct usage functions
+export const writeStdout = async (text: string): Promise<void> => {
+  const encoder = new TextEncoder();
+  return new Promise((resolve, reject) => {
+    process.stdout.write(encoder.encode(text), (err) => {
+      if (err) reject(err);
+      else resolve();
+    });
+  });
+};
 ```
 
 ### Step 1.3: Create Stream I/O Helper
