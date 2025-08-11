@@ -89,14 +89,15 @@ const isNode = typeof process !== 'undefined';
 ## Migration Complexity Assessment
 
 ### Low Complexity (Direct Replacement)
-- File system operations → Node.js `fs/promises`
-- Process operations → Node.js `process`
-- Command execution → Node.js `child_process`
+- File system operations → `node:fs/promises` ESM module
+- Process operations → `node:process` and WebAPI `globalThis.process`
+- Command execution → `node:child_process` ESM module
 
 ### Medium Complexity (Requires Adaptation)  
-- Stream operations → Node.js streams with different APIs
-- Signal handling → Node.js `process.on()`
-- Memory usage → Node.js `process.memoryUsage()`
+- Stream operations → `node:stream/web` WebStreams API
+- Signal handling → `node:process` event handling
+- Memory usage → `node:process` memory APIs
+- Text encoding → Web standard `TextEncoder`/`TextDecoder`
 
 ### High Complexity (Architecture Changes)
 - Runtime detection logic in multiple files
