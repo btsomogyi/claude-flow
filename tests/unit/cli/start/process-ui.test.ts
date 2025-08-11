@@ -74,9 +74,28 @@ describe('ProcessUI', () => {
   let processManager: ProcessManager;
   let processUI: ProcessUI;
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    // Clear all mocks before each test
+    jest.clearAllMocks();
+    
+    // Reset Deno mock functions
+    mockDeno.stdin.read.mockClear();
+    mockDeno.stdout.write.mockClear();
+    
     processManager = new ProcessManager();
     processUI = new ProcessUI(processManager);
+  });
+
+  afterEach(async () => {
+    // Clean up any running processes
+    try {
+      await processManager.stopAll();
+    } catch (error) {
+      // Ignore cleanup errors
+    }
+    
+    // Clear all mocks after each test
+    jest.clearAllMocks();
   });
 
   describe('initialization', () => {
