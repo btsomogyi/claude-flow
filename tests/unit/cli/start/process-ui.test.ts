@@ -365,12 +365,11 @@ describe('ProcessUI', () => {
         }
       };
       
-      // Mock stdin to return 'n'
-      const originalRead = Deno.stdin.read;
-      Deno.stdin.read = async (buf: Uint8Array) => {
+      // Mock stdin to return 'n' (ASCII 110)
+      mockDeno.stdin.read.mockImplementation(async (buf: Uint8Array) => {
         buf[0] = 110; // 'n'
         return 1;
-      };
+      });
       
       // Mock stop method
       let stopCalled = false;
@@ -385,7 +384,6 @@ describe('ProcessUI', () => {
       
       // Restore
       console.log = originalLog;
-      Deno.stdin.read = originalRead;
     });
   });
 });
