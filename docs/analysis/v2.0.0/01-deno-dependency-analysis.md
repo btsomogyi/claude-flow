@@ -8,8 +8,8 @@ This report analyzes all Deno framework dependencies within the `/src` directory
 
 - **28 files** contain Deno API usage across multiple modules
 - **No external Deno dependencies** from JSR or deno.land
-- **Existing Node.js compatibility layer** already implemented in `src/cli/node-compat.js`
-- **Runtime detection layer** exists in `src/cli/runtime-detector.js`
+- **Existing Node.js compatibility layer** provides foundation for WebAPI migration
+- **Runtime detection layer** can be modernized to TypeScript standards
 
 ## Deno API Usage Categories
 
