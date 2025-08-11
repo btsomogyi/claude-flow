@@ -224,6 +224,9 @@ describe('ProcessUI', () => {
     });
 
     it('should start process', async () => {
+      // Mock Deno.stdin.read to simulate user input
+      mockDeno.stdin.read.mockResolvedValue(1);
+      
       const startProcess = processUI['startProcess'].bind(processUI);
       
       await startProcess('event-bus');
