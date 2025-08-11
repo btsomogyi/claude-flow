@@ -618,6 +618,45 @@ export class MCPServer implements IMCPServer {
     }
   }
 
+  /**
+   * Register checkpoint control MCP tools
+   */
+  private registerCheckpointTools(): void {
+    try {
+      // Initialize checkpoint state manager with session ID if available
+      const sessionId = this.currentSession?.id || `mcp-session-${Date.now()}`;
+      if (!checkpointStateManager.getSessionInfo()) {
+        checkpointStateManager.initializeSession(sessionId);
+      }
+
+      // Create checkpoint tools
+      const checkpointTools = createCheckpointTools(this.logger);
+
+      for (const tool of checkpointTools) {
+        // Wrap the handler to inject checkpoint context
+        const originalHandler = tool.handler;
+        tool.handler = async (input: unknown, context?: MCPContext) => {
+          const checkpointContext: CheckpointToolContext = {
+            ...context,
+            sessionId: this.currentSession?.id || sessionId,
+          };
+
+          return await originalHandler(input, checkpointContext);
+        };
+
+        this.registerTool(tool);
+      }
+
+      this.logger.info('Registered checkpoint control MCP tools', {
+        count: checkpointTools.length,
+        sessionId,
+        toolNames: checkpointTools.map(t => t.name),
+      });
+    } catch (error) {
+      this.logger.error('Error registering checkpoint MCP tools', error);
+    }
+  }
+
   private errorToMCPError(error): MCPError {
     if (error instanceof MCPMethodNotFoundError) {
       return {
