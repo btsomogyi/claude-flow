@@ -60,19 +60,19 @@ git checkout -b feature/migrate-to-webapi-esm
 
 #### 2.1 High-Priority Files (Day 2)
 1. **`src/cli/index.ts`** - Main CLI entry point
-   - Replace `Deno.args` → `process.argv.slice(2)`
-   - Replace `Deno.addSignalListener` → `process.on`
-   - Update graceful shutdown logic
+   - Replace `Deno.args` → `import process from 'node:process'; process.argv.slice(2)`
+   - Replace `Deno.addSignalListener` → `process.on` with AbortController patterns
+   - Update graceful shutdown using WebAPI standards
 
 2. **`src/cli/simple-cli.ts`** - Primary CLI interface
-   - 8 Deno API calls to replace
-   - Complex stream I/O operations to migrate
-   - Command execution patterns to update
+   - 8 Deno API calls to replace with WebAPI + ESM equivalents
+   - Migrate to WebStreams API for I/O operations
+   - Update command execution to use standards-compliant Command class
 
-3. **`src/cli/runtime-detector.js`** - Runtime detection
-   - Complete rewrite to Node.js-only implementation
-   - Remove all Deno detection logic
-   - Simplify platform information gathering
+3. **`src/cli/runtime-detector.js`** → **`src/utils/runtime-adapter.ts`**
+   - Complete rewrite using feature-based detection
+   - Replace runtime detection with WebAPI feature testing
+   - Implement cross-runtime compatibility patterns
 
 #### 2.2 Medium-Priority Files (Day 3)
 4. **`src/cli/index-remote.ts`** - Remote CLI functionality
