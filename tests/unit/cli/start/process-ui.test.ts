@@ -2,10 +2,24 @@
  * Test suite for ProcessUI
  */
 
-import { describe, it, beforeEach, afterEach, expect } from "../../../test.utils";
+import { describe, it, beforeEach, afterEach, expect, jest } from "../../../test.utils";
 import { ProcessUI } from '../../../../src/cli/commands/start/process-ui.ts';
 import { ProcessManager } from '../../../../src/cli/commands/start/process-manager.ts';
 import { ProcessStatus } from '../../../../src/cli/commands/start/types.ts';
+
+// Mock Deno global for Node.js test environment
+const mockDeno = {
+  pid: 12345,
+  stdin: {
+    read: jest.fn<Promise<number | null>, [Uint8Array]>()
+  },
+  stdout: {
+    write: jest.fn<Promise<number>, [Uint8Array]>()
+  }
+};
+
+// Set up global Deno mock
+(global as any).Deno = mockDeno;
 
 describe('ProcessUI', () => {
   let processManager: ProcessManager;
