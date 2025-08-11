@@ -187,19 +187,19 @@ npm run test:linux
 - Leverage Web Platform APIs for maximum compatibility
 - Test against multiple JavaScript runtime environments
 
-#### 3. Command Execution
-**Risk**: Different subprocess handling patterns
+#### 3. Standards-Compliant Command Execution
+**Risk**: Subprocess handling differences across runtimes
 **Mitigation**:
-- Implement robust `CommandExecutor` wrapper
-- Handle edge cases (signal propagation, stdio inheritance)
-- Test complex command chaining scenarios
+- Implement standards-compliant `Command` class with WebAPI patterns
+- Handle edge cases using Web standards (AbortController for cancellation)
+- Test complex command scenarios with proper signal handling
 
-#### 4. File System Operations
-**Risk**: Permission and error handling differences
+#### 4. WebAPI Error Handling
+**Risk**: Different error types and handling patterns
 **Mitigation**:
-- Map Node.js error codes to Deno-compatible errors
-- Maintain recursive directory operation semantics
-- Test edge cases (symlinks, permissions)
+- Implement Web-compatible error classes with proper inheritance
+- Map Node.js error codes to WebAPI-style errors
+- Use modern Error constructor options (cause chains)
 
 ## Testing Strategy
 
