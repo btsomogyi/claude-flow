@@ -1,0 +1,1 @@
+{"checkpoint": "task-20250811-012459", "task": "change the migration plan from Deno->nodejs to Deno->TypeScript WebAPIs and Node’s ESM node:* modu", "timestamp": "2025-08-11T05:24:59Z", "commit": "9d88057e249b8f50ec070b5b774f08baf2f6cf11", "github_release": "true"}

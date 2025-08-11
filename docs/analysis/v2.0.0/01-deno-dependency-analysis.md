@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-This report analyzes all Deno framework dependencies within the `/src` directory of the claude-flow project and provides a comprehensive plan for their removal and replacement with native Node.js alternatives.
+This report analyzes all Deno framework dependencies within the `/src` directory of the claude-flow project and provides a comprehensive plan for their removal and replacement with modern TypeScript WebAPIs and Node.js ESM `node:*` modules.
 
 ### Key Findings
 
