@@ -35,6 +35,8 @@ import {
   isRuvSwarmAvailable,
   initializeRuvSwarmIntegration,
 } from './ruv-swarm-tools.js';
+import { createCheckpointTools, CheckpointToolContext } from './checkpoint-tools.js';
+import { checkpointStateManager } from '../services/checkpoint-state-manager.js';
 import { platform, arch } from 'node:os';
 import { performance } from 'node:perf_hooks';
 
