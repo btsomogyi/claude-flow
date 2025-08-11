@@ -173,19 +173,19 @@ npm run test:linux
 
 ### High-Risk Scenarios
 
-#### 1. Stream I/O Operations
-**Risk**: Different API patterns between Deno and Node.js streams
+#### 1. WebStreams API Migration
+**Risk**: Complex transition from Deno streams to WebStreams API
 **Mitigation**: 
-- Create comprehensive `StreamIO` wrapper class
-- Extensive testing of interactive CLI features
-- Fallback to synchronous operations where necessary
+- Create comprehensive `WebStreamIO` class using WebAPI standards
+- Extensive testing of interactive CLI features with WebStreams
+- Fallback to traditional Node.js streams if WebStreams unavailable
 
-#### 2. Cross-Platform Compatibility
-**Risk**: Platform-specific behavior differences
+#### 2. Cross-Runtime Compatibility
+**Risk**: Code not working across Node.js, Bun, and future runtimes
 **Mitigation**:
-- Maintain existing cross-platform abstraction layer
-- Test on Windows, macOS, and Linux
-- Use Node.js built-in platform detection
+- Use feature detection instead of runtime detection
+- Leverage Web Platform APIs for maximum compatibility
+- Test against multiple JavaScript runtime environments
 
 #### 3. Command Execution
 **Risk**: Different subprocess handling patterns
