@@ -560,6 +560,9 @@ export class MCPServer implements IMCPServer {
 
     // Register ruv-swarm MCP tools if available
     this.registerRuvSwarmTools();
+
+    // Register checkpoint control tools
+    this.registerCheckpointTools();
   }
 
   /**
