@@ -156,18 +156,18 @@ npm run test:linux
 
 ## API Replacement Summary
 
-### Most Common Replacements
+### Most Common WebAPI + ESM Replacements
 
-| Deno API | Node.js Equivalent | Frequency | Notes |
-|----------|-------------------|-----------|-------|
-| `Deno.mkdir()` | `fs.mkdir()` | 15 | Direct replacement |
-| `Deno.readDir()` | `fs.readdir()` | 12 | API structure differs |
-| `Deno.Command` | Custom `CommandExecutor` | 10 | Requires wrapper class |
-| `Deno.stat()` | `fs.stat()` | 8 | Direct replacement |
-| `Deno.remove()` | `fs.rm()` | 7 | Direct replacement |
-| `Deno.args` | `process.argv.slice(2)` | 6 | Simple substitution |
-| `Deno.stdout.write()` | `process.stdout.write()` | 5 | API structure differs |
-| `Deno.stdin.read()` | Stream handling | 4 | Complex migration |
+| Deno API | WebAPI + Node ESM Equivalent | Frequency | Notes |
+|----------|------------------------------|-----------|-------|
+| `Deno.mkdir()` | `import { mkdir } from 'node:fs/promises'` | 15 | Direct ESM import |
+| `Deno.readDir()` | `import { readdir } from 'node:fs/promises'` | 12 | WebAPI-style wrapper |
+| `Deno.Command` | Standards-compliant `Command` class | 10 | WebAPI-compatible interface |
+| `Deno.stat()` | `import { stat } from 'node:fs/promises'` | 8 | Direct ESM import |
+| `Deno.remove()` | `import { rm } from 'node:fs/promises'` | 7 | Direct ESM import |
+| `Deno.args` | `import process from 'node:process'` | 6 | ESM import + globalThis |
+| `Deno.stdout.write()` | WebStreams `WritableStream` | 5 | WebAPI standard |
+| `Deno.stdin.read()` | WebStreams `ReadableStream` | 4 | WebAPI standard |
 
 ## Risk Mitigation Strategies
 
