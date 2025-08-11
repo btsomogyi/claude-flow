@@ -39,17 +39,43 @@ describe('ProcessUI', () => {
     mockDeno.stdin.read.mockClear();
     mockDeno.stdout.write.mockClear();
     
+    // Silence console output during tests
+    console.log = jest.fn();
+    console.error = jest.fn();
+    console.warn = jest.fn();
+    
     processManager = new ProcessManager();
     processUI = new ProcessUI(processManager);
+    
+    // Override the ProcessManager's component initialization to use mocks
+    const originalStartProcess = processManager.startProcess.bind(processManager);
+    processManager.startProcess = jest.fn().mockImplementation(async (processId: string) => {
+      const process = processManager.getProcess(processId);
+      if (process) {
+        process.status = ProcessStatus.RUNNING;
+        process.startTime = Date.now();
+        process.pid = 12345;
+        processManager.emit('processStarted', { processId, process });
+      }
+    });
+    
+    const originalStopProcess = processManager.stopProcess.bind(processManager);
+    processManager.stopProcess = jest.fn().mockImplementation(async (processId: string) => {
+      const process = processManager.getProcess(processId);
+      if (process) {
+        process.status = ProcessStatus.STOPPED;
+        delete process.startTime;
+        delete process.pid;
+        processManager.emit('processStopped', { processId });
+      }
+    });
   });
 
   afterEach(async () => {
-    // Clean up any running processes
-    try {
-      await processManager.stopAll();
-    } catch (error) {
-      // Ignore cleanup errors
-    }
+    // Restore console methods
+    console.log = originalConsoleLog;
+    console.error = originalConsoleError; 
+    console.warn = originalConsoleWarn;
     
     // Clear all mocks after each test
     jest.clearAllMocks();
