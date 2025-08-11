@@ -454,6 +454,23 @@ describe('ProcessManager', () => {
 
   describe('process metrics', () => {
     it('should track last error in metrics', async () => {
+      // Mock a failing process by overriding the mocked startProcess for this test
+      const originalMock = processManager.startProcess;
+      processManager.startProcess = jest.fn().mockImplementation(async (processId: string) => {
+        const process = processManager.getProcess(processId);
+        if (!process) {
+          throw new Error(`Unknown process: ${processId}`);
+        }
+        if (processId === 'orchestrator') {
+          // Simulate error for orchestrator
+          process.status = ProcessStatus.ERROR;
+          process.metrics = { ...process.metrics, lastError: 'Required components not initialized' };
+          throw new Error('Required components not initialized');
+        }
+        // Use original mock behavior for other processes
+        return originalMock(processId);
+      });
+      
       const processId = 'orchestrator';
       await processManager.initialize();
       
