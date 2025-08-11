@@ -261,46 +261,57 @@ export const writeStdout = async (text: string): Promise<void> => {
 };
 ```
 
-### Step 1.3: Create Stream I/O Helper
-**New File**: `src/utils/stream-io.js`
+### Step 1.3: Create WebAPI Error Classes
+**New File**: `src/utils/webapi-errors.ts`
 
-```javascript
-export class StreamIO {
-  constructor() {
-    this.encoder = new TextEncoder();
-    this.decoder = new TextDecoder();
-  }
-
-  async writeStdout(data) {
-    if (typeof data === 'string') {
-      data = this.encoder.encode(data);
+```typescript
+// Standards-compliant error classes matching WebAPI conventions
+export class WebCompatErrors {
+  static NotFound = class NotFoundError extends Error {
+    readonly name = 'NotFoundError';
+    readonly code = 'ENOENT';
+    
+    constructor(message = 'Not found', options?: ErrorOptions) {
+      super(message, options);
     }
-    return new Promise((resolve, reject) => {
-      process.stdout.write(data, (err) => {
-        if (err) reject(err);
-        else resolve(data.length);
-      });
-    });
-  }
+  };
 
-  async readStdin(buffer) {
-    return new Promise(resolve => {
-      if (process.stdin.isTTY) {
-        process.stdin.setRawMode(true);
-      }
-      process.stdin.resume();
-      process.stdin.once('data', data => {
-        const bytes = Math.min(data.length, buffer.length);
-        buffer.set(data.slice(0, bytes));
-        if (process.stdin.isTTY) {
-          process.stdin.setRawMode(false);
-        }
-        process.stdin.pause();
-        resolve(bytes);
-      });
-    });
-  }
+  static AlreadyExists = class AlreadyExistsError extends Error {
+    readonly name = 'AlreadyExistsError';
+    readonly code = 'EEXIST';
+    
+    constructor(message = 'Already exists', options?: ErrorOptions) {
+      super(message, options);
+    }
+  };
+
+  static PermissionDenied = class PermissionDeniedError extends Error {
+    readonly name = 'PermissionDeniedError';
+    readonly code = 'EACCES';
+    
+    constructor(message = 'Permission denied', options?: ErrorOptions) {
+      super(message, options);
+    }
+  };
 }
+
+// Map Node.js errors to WebAPI-style errors
+export const mapNodeError = (error: NodeJS.ErrnoException): Error => {
+  switch (error.code) {
+    case 'ENOENT':
+      return new WebCompatErrors.NotFound(error.message, { cause: error });
+    case 'EEXIST':
+      return new WebCompatErrors.AlreadyExists(error.message, { cause: error });
+    case 'EACCES':
+    case 'EPERM':
+      return new WebCompatErrors.PermissionDenied(error.message, { cause: error });
+    default:
+      return error;
+  }
+};
+
+// Export for compatibility
+export const errors = WebCompatErrors;
 ```
 
 ## Phase 2: Core File Migration (Days 2-4)
