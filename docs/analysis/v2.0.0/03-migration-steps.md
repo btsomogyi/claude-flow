@@ -1,4 +1,4 @@
-# Deno to Node.js Migration Steps
+# Deno to WebAPIs and Node.js ESM Migration Steps
 
 ## Pre-Migration Checklist
 
