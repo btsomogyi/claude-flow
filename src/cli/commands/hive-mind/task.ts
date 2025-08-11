@@ -10,6 +10,8 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import inquirer from 'inquirer';
+import Table from 'cli-table3';
+import progressBar from 'cli-progress';
 import { HiveMind } from '../../../hive-mind/core/HiveMind.js';
 import { TaskPriority, TaskStrategy } from '../../../hive-mind/types.js';
 import { formatSuccess, formatError, formatInfo, formatWarning } from '../../formatter.js';
@@ -196,7 +198,6 @@ async function listTasks(hiveMind: HiveMind) {
   }
 
   console.log('\n' + chalk.bold('📋 Task List:'));
-  const Table = require('cli-table3');
   const table = new Table({
     head: ['ID', 'Description', 'Priority', 'Status', 'Progress', 'Agents'],
     style: { head: ['cyan'] },
@@ -245,7 +246,7 @@ async function watchTaskProgress(hiveMind: HiveMind, taskId: string) {
   let lastProgress = -1;
   let completed = false;
 
-  const progressBar = require('cli-progress');
+  // Progress bar setup
   const bar = new progressBar.SingleBar({
     format: 'Progress |' + chalk.cyan('{bar}') + '| {percentage}% | {status}',
     barCompleteChar: '\u2588',
