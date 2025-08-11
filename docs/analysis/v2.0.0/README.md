@@ -131,16 +131,16 @@ Start with: `03-migration-steps.md`
 ## Testing Strategy
 
 ### Automated Testing
-- Unit tests for each migrated API
-- Integration tests for CLI workflows
-- Cross-platform compatibility tests
-- Performance benchmarks
+- Unit tests for WebAPI compliance
+- Integration tests for CLI workflows with WebStreams
+- Cross-runtime compatibility tests (Node.js, Bun)
+- Performance benchmarks comparing WebAPI vs legacy patterns
 
 ### Manual Testing
-- Complete CLI command validation
-- Edge case testing (signals, permissions)
-- Real-world usage scenarios
-- Stress testing with large files/operations
+- Complete CLI command validation with WebAPI patterns
+- Edge case testing (AbortController signals, WebAPI errors)
+- Real-world usage scenarios across different runtimes
+- Stress testing with WebStreams for large files/operations
 
 ## Success Metrics
 
