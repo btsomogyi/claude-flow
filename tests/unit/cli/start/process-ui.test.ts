@@ -21,6 +21,55 @@ const mockDeno = {
 // Set up global Deno mock
 (global as any).Deno = mockDeno;
 
+// Mock the MCP server to prevent "already running" conflicts
+jest.mock('../../../../src/mcp/server.js', () => {
+  return {
+    MCPServer: jest.fn().mockImplementation(() => ({
+      start: jest.fn().mockResolvedValue(undefined),
+      stop: jest.fn().mockResolvedValue(undefined),
+      isRunning: jest.fn().mockReturnValue(false),
+      getHealthStatus: jest.fn().mockResolvedValue({ healthy: true })
+    }))
+  };
+});
+
+// Mock other dependencies that might conflict
+jest.mock('../../../../src/core/orchestrator.js', () => {
+  return {
+    Orchestrator: jest.fn().mockImplementation(() => ({
+      initialize: jest.fn().mockResolvedValue(undefined),
+      shutdown: jest.fn().mockResolvedValue(undefined)
+    }))
+  };
+});
+
+jest.mock('../../../../src/terminal/manager.js', () => {
+  return {
+    TerminalManager: jest.fn().mockImplementation(() => ({
+      initialize: jest.fn().mockResolvedValue(undefined),
+      shutdown: jest.fn().mockResolvedValue(undefined)
+    }))
+  };
+});
+
+jest.mock('../../../../src/memory/manager.js', () => {
+  return {
+    MemoryManager: jest.fn().mockImplementation(() => ({
+      initialize: jest.fn().mockResolvedValue(undefined),
+      shutdown: jest.fn().mockResolvedValue(undefined)
+    }))
+  };
+});
+
+jest.mock('../../../../src/coordination/manager.js', () => {
+  return {
+    CoordinationManager: jest.fn().mockImplementation(() => ({
+      initialize: jest.fn().mockResolvedValue(undefined),
+      shutdown: jest.fn().mockResolvedValue(undefined)
+    }))
+  };
+});
+
 describe('ProcessUI', () => {
   let processManager: ProcessManager;
   let processUI: ProcessUI;
