@@ -1,8 +1,16 @@
-# Deno to Node.js API Mapping Guide
+# Deno to WebAPIs and Node ESM Mapping Guide
 
 ## Overview
 
-This document provides exact mappings from Deno APIs to their Node.js equivalents, including code examples and implementation patterns.
+This document provides exact mappings from Deno APIs to their WebAPI and Node.js ESM `node:*` module equivalents, focusing on modern standards-compliant implementations.
+
+## Migration Philosophy
+
+### Modern Node.js Approach
+- **ESM `node:*` imports**: Explicit, tree-shakeable, standards-compliant
+- **WebAPIs**: Cross-runtime compatibility (Node.js, Bun, Deno)  
+- **TypeScript-first**: Native type support without @types packages
+- **Standards compliance**: Following Web Platform APIs where possible
 
 ## File System Operations
 
@@ -13,8 +21,8 @@ This document provides exact mappings from Deno APIs to their Node.js equivalent
 // Deno
 await Deno.mkdir(path, { recursive: true });
 
-// Node.js
-import { mkdir } from 'fs/promises';
+// WebAPI + Node ESM
+import { mkdir } from 'node:fs/promises';
 await mkdir(path, { recursive: true });
 ```
 
@@ -25,12 +33,23 @@ for await (const entry of Deno.readDir(path)) {
   console.log(entry.name, entry.isFile);
 }
 
-// Node.js
-import { readdir } from 'fs/promises';
+// WebAPI + Node ESM  
+import { readdir } from 'node:fs/promises';
 const entries = await readdir(path, { withFileTypes: true });
 for (const entry of entries) {
   console.log(entry.name, entry.isFile());
 }
+
+// WebAPI-style wrapper
+export const readDir = async (path: string) => {
+  const entries = await readdir(path, { withFileTypes: true });
+  return entries.map(entry => ({
+    name: entry.name,
+    isFile: entry.isFile(),
+    isDirectory: entry.isDirectory(),
+    isSymlink: entry.isSymbolicLink()
+  }));
+};
 ```
 
 #### `Deno.remove()`
@@ -38,31 +57,38 @@ for (const entry of entries) {
 // Deno
 await Deno.remove(path, { recursive: true });
 
-// Node.js
-import { rm } from 'fs/promises';
+// WebAPI + Node ESM
+import { rm } from 'node:fs/promises';
 await rm(path, { recursive: true, force: true });
 ```
 
 ### File Operations
 
-#### `Deno.readTextFile()`
+#### `Deno.readTextFile()` / `Deno.writeTextFile()`
 ```typescript
 // Deno
 const content = await Deno.readTextFile(path);
-
-// Node.js
-import { readFile } from 'fs/promises';
-const content = await readFile(path, 'utf-8');
-```
-
-#### `Deno.writeTextFile()`
-```typescript
-// Deno
 await Deno.writeTextFile(path, content);
 
-// Node.js
-import { writeFile } from 'fs/promises';
+// WebAPI + Node ESM
+import { readFile, writeFile } from 'node:fs/promises';
+
+const content = await readFile(path, 'utf-8');
 await writeFile(path, content, 'utf-8');
+
+// WebAPI-style with encoding handling
+const encoder = new TextEncoder();
+const decoder = new TextDecoder();
+
+export const readTextFile = async (path: string): Promise<string> => {
+  const buffer = await readFile(path);
+  return decoder.decode(buffer);
+};
+
+export const writeTextFile = async (path: string, content: string): Promise<void> => {
+  const encoded = encoder.encode(content);
+  await writeFile(path, encoded);
+};
 ```
 
 #### `Deno.copyFile()`
@@ -70,8 +96,8 @@ await writeFile(path, content, 'utf-8');
 // Deno
 await Deno.copyFile(src, dest);
 
-// Node.js
-import { copyFile } from 'fs/promises';
+// WebAPI + Node ESM
+import { copyFile } from 'node:fs/promises';
 await copyFile(src, dest);
 ```
 
@@ -80,19 +106,24 @@ await copyFile(src, dest);
 // Deno
 const info = await Deno.stat(path);
 
-// Node.js
-import { stat } from 'fs/promises';
+// WebAPI + Node ESM
+import { stat } from 'node:fs/promises';
 const info = await stat(path);
-```
 
-#### `Deno.chmod()`
-```typescript
-// Deno
-await Deno.chmod(path, 0o755);
-
-// Node.js
-import { chmod } from 'fs/promises';
-await chmod(path, 0o755);
+// WebAPI-compatible wrapper
+export const statFile = async (path: string) => {
+  const stats = await stat(path);
+  return {
+    isFile: stats.isFile(),
+    isDirectory: stats.isDirectory(), 
+    isSymlink: stats.isSymbolicLink(),
+    size: stats.size,
+    mtime: stats.mtime,
+    atime: stats.atime,
+    birthtime: stats.birthtime,
+    mode: stats.mode
+  };
+};
 ```
 
 ## Process Operations
@@ -104,8 +135,12 @@ await chmod(path, 0o755);
 // Deno
 const args = Deno.args;
 
-// Node.js
+// WebAPI + Node ESM
+import process from 'node:process';
 const args = process.argv.slice(2);
+
+// Or using globalThis (WebAPI style)
+const args = globalThis.process?.argv.slice(2) ?? [];
 ```
 
 ### Process Information
@@ -115,8 +150,12 @@ const args = process.argv.slice(2);
 // Deno
 const processId = Deno.pid;
 
-// Node.js
+// WebAPI + Node ESM
+import process from 'node:process';
 const processId = process.pid;
+
+// WebAPI style
+const processId = globalThis.process?.pid;
 ```
 
 ### Process Control
@@ -126,8 +165,12 @@ const processId = process.pid;
 // Deno
 Deno.exit(code);
 
-// Node.js
+// WebAPI + Node ESM
+import process from 'node:process';
 process.exit(code);
+
+// WebAPI style
+globalThis.process?.exit(code);
 ```
 
 #### `Deno.kill()`
@@ -135,7 +178,8 @@ process.exit(code);
 // Deno
 Deno.kill(pid, 'SIGTERM');
 
-// Node.js
+// WebAPI + Node ESM
+import process from 'node:process';
 process.kill(pid, 'SIGTERM');
 ```
 
@@ -150,44 +194,92 @@ const command = new Deno.Command('node', {
 });
 const result = await command.output();
 
-// Node.js
-import { spawn } from 'child_process';
-import { promisify } from 'util';
+// WebAPI + Node ESM - Standards-compliant Command class
+import { spawn } from 'node:child_process';
+import { promisify } from 'node:util';
 
-const spawnCommand = (cmd, args, options) => {
-  return new Promise((resolve, reject) => {
-    const child = spawn(cmd, args, {
-      ...options,
-      stdio: ['pipe', 'pipe', 'pipe']
-    });
-    
-    let stdout = [];
-    let stderr = [];
-    
-    child.stdout.on('data', data => stdout.push(data));
-    child.stderr.on('data', data => stderr.push(data));
-    
-    child.on('close', code => {
-      resolve({
-        code,
-        success: code === 0,
-        stdout: Buffer.concat(stdout),
-        stderr: Buffer.concat(stderr)
+export class Command {
+  constructor(
+    private command: string, 
+    private options: {
+      args?: string[];
+      cwd?: string;
+      env?: Record<string, string>;
+      stdin?: 'piped' | 'inherit' | 'null';
+      stdout?: 'piped' | 'inherit' | 'null'; 
+      stderr?: 'piped' | 'inherit' | 'null';
+    } = {}
+  ) {}
+
+  async output(): Promise<{
+    success: boolean;
+    code: number;
+    stdout: Uint8Array;
+    stderr: Uint8Array;
+  }> {
+    return new Promise((resolve, reject) => {
+      const child = spawn(this.command, this.options.args ?? [], {
+        cwd: this.options.cwd,
+        env: { ...process.env, ...this.options.env },
+        stdio: ['pipe', 'pipe', 'pipe']
       });
-    });
-    
-    child.on('error', reject);
-  });
-};
 
-const result = await spawnCommand('node', ['--version'], {
-  env: { ...process.env }
+      const stdout: Buffer[] = [];
+      const stderr: Buffer[] = [];
+
+      child.stdout?.on('data', data => stdout.push(data));
+      child.stderr?.on('data', data => stderr.push(data));
+
+      child.on('close', code => {
+        resolve({
+          success: code === 0,
+          code: code ?? -1,
+          stdout: new Uint8Array(Buffer.concat(stdout)),
+          stderr: new Uint8Array(Buffer.concat(stderr))
+        });
+      });
+
+      child.on('error', reject);
+    });
+  }
+
+  spawn() {
+    const child = spawn(this.command, this.options.args ?? [], {
+      cwd: this.options.cwd,
+      env: { ...process.env, ...this.options.env },
+      stdio: [
+        this.options.stdin === 'inherit' ? 'inherit' : 'pipe',
+        this.options.stdout === 'inherit' ? 'inherit' : 'pipe',
+        this.options.stderr === 'inherit' ? 'inherit' : 'pipe'
+      ]
+    });
+
+    return {
+      status: new Promise<{ success: boolean; code: number }>(resolve => {
+        child.on('close', code => {
+          resolve({ success: code === 0, code: code ?? -1 });
+        });
+      }),
+      stdout: child.stdout,
+      stderr: child.stderr,
+      stdin: child.stdin,
+      kill: (signal?: NodeJS.Signals) => child.kill(signal),
+      pid: child.pid
+    };
+  }
+}
+
+// Usage
+const command = new Command('node', {
+  args: ['--version'],
+  env: process.env
 });
+const result = await command.output();
 ```
 
-## I/O Stream Operations
+## Stream Operations (WebStreams API)
 
-### Standard Streams
+### Standard Streams with WebStreams
 
 #### `Deno.stdin`, `Deno.stdout`, `Deno.stderr`
 ```typescript
@@ -195,28 +287,80 @@ const result = await spawnCommand('node', ['--version'], {
 await Deno.stdout.write(encoder.encode(text));
 const n = await Deno.stdin.read(buffer);
 
-// Node.js
-import { promisify } from 'util';
+// WebAPI + Node ESM with WebStreams
+import process from 'node:process';
+import { Readable, Writable } from 'node:stream/web';
 
-// Stdout
-const writeStdout = promisify(process.stdout.write.bind(process.stdout));
-await writeStdout(text);
+// Modern WebStreams approach
+export class StandardStreams {
+  private encoder = new TextEncoder();
+  private decoder = new TextDecoder();
 
-// Stdin (more complex - requires event handling)
-const readStdin = (buffer) => {
-  return new Promise((resolve) => {
-    if (process.stdin.isTTY) {
-      process.stdin.setRawMode(true);
-    }
-    process.stdin.resume();
-    process.stdin.once('data', (data) => {
-      const bytes = Math.min(data.length, buffer.length);
-      buffer.set(data.slice(0, bytes));
-      if (process.stdin.isTTY) {
-        process.stdin.setRawMode(false);
+  // Stdout as WritableStream
+  get stdout(): WritableStream<Uint8Array> {
+    return new WritableStream({
+      write: async (chunk) => {
+        return new Promise((resolve, reject) => {
+          process.stdout.write(chunk, (err) => {
+            if (err) reject(err);
+            else resolve();
+          });
+        });
       }
-      process.stdin.pause();
-      resolve(bytes);
+    });
+  }
+
+  // Stdin as ReadableStream
+  get stdin(): ReadableStream<Uint8Array> {
+    return new ReadableStream({
+      start(controller) {
+        process.stdin.on('data', (chunk) => {
+          controller.enqueue(new Uint8Array(chunk));
+        });
+
+        process.stdin.on('end', () => {
+          controller.close();
+        });
+
+        process.stdin.on('error', (err) => {
+          controller.error(err);
+        });
+      }
+    });
+  }
+
+  async writeStdout(data: string | Uint8Array): Promise<void> {
+    const writer = this.stdout.getWriter();
+    try {
+      const chunk = typeof data === 'string' ? this.encoder.encode(data) : data;
+      await writer.write(chunk);
+    } finally {
+      writer.releaseLock();
+    }
+  }
+
+  async readStdin(buffer: Uint8Array): Promise<number> {
+    const reader = this.stdin.getReader();
+    try {
+      const { done, value } = await reader.read();
+      if (done) return 0;
+      
+      const bytesToCopy = Math.min(value.length, buffer.length);
+      buffer.set(value.slice(0, bytesToCopy));
+      return bytesToCopy;
+    } finally {
+      reader.releaseLock();
+    }
+  }
+}
+
+// Simplified direct usage
+export const writeStdout = async (text: string): Promise<void> => {
+  const encoder = new TextEncoder();
+  return new Promise((resolve, reject) => {
+    process.stdout.write(encoder.encode(text), (err) => {
+      if (err) reject(err);
+      else resolve();
     });
   });
 };
@@ -232,9 +376,26 @@ const readStdin = (buffer) => {
 const env = Deno.env.toObject();
 const value = Deno.env.get('PATH');
 
-// Node.js
-const env = { ...process.env };
-const value = process.env.PATH;
+// WebAPI + Node ESM
+import process from 'node:process';
+
+export const env = {
+  get: (key: string): string | undefined => process.env[key],
+  set: (key: string, value: string): void => {
+    process.env[key] = value;
+  },
+  delete: (key: string): void => {
+    delete process.env[key];
+  },
+  toObject: (): Record<string, string | undefined> => ({ ...process.env }),
+  has: (key: string): boolean => key in process.env
+};
+
+// WebAPI style with globalThis
+const env = {
+  get: (key: string) => globalThis.process?.env[key],
+  toObject: () => ({ ...globalThis.process?.env })
+};
 ```
 
 ### Platform Information
@@ -245,11 +406,33 @@ const value = process.env.PATH;
 const os = Deno.build.os;
 const arch = Deno.build.arch;
 
-// Node.js
-const os = process.platform === 'win32' ? 'windows' : 
-           process.platform === 'darwin' ? 'darwin' :
-           process.platform === 'linux' ? 'linux' : process.platform;
-const arch = process.arch;
+// WebAPI + Node ESM
+import process from 'node:process';
+
+export const build = {
+  os: process.platform === 'win32' ? 'windows' :
+      process.platform === 'darwin' ? 'darwin' :
+      process.platform === 'linux' ? 'linux' : 
+      process.platform,
+  arch: process.arch,
+  target: `${process.arch}-${process.platform}`,
+  platform: process.platform
+};
+
+// WebAPI style with feature detection
+export const getBuildInfo = () => {
+  const platform = globalThis.process?.platform ?? 'unknown';
+  const arch = globalThis.process?.arch ?? 'unknown';
+  
+  return {
+    os: platform === 'win32' ? 'windows' : 
+        platform === 'darwin' ? 'darwin' :
+        platform === 'linux' ? 'linux' : platform,
+    arch,
+    target: `${arch}-${platform}`,
+    platform
+  };
+};
 ```
 
 ### Memory Usage
@@ -259,8 +442,30 @@ const arch = process.arch;
 // Deno
 const memory = Deno.memoryUsage();
 
-// Node.js
-const memory = process.memoryUsage();
+// WebAPI + Node ESM
+import process from 'node:process';
+
+export const memoryUsage = () => {
+  const usage = process.memoryUsage();
+  return {
+    rss: usage.rss,
+    heapUsed: usage.heapUsed,
+    heapTotal: usage.heapTotal,
+    external: usage.external,
+    // Deno compatibility
+    heap: usage.heapUsed
+  };
+};
+
+// WebAPI style
+export const getMemoryUsage = () => {
+  return globalThis.process?.memoryUsage() ?? {
+    rss: 0,
+    heapUsed: 0, 
+    heapTotal: 0,
+    external: 0
+  };
+};
 ```
 
 ## Signal Handling
@@ -270,11 +475,31 @@ const memory = process.memoryUsage();
 // Deno
 Deno.addSignalListener('SIGINT', handler);
 
-// Node.js
-process.on('SIGINT', handler);
+// WebAPI + Node ESM
+import process from 'node:process';
+
+export const addSignalListener = (signal: NodeJS.Signals, handler: () => void): void => {
+  process.on(signal, handler);
+};
+
+// Multiple signal helper
+export const addSignalListeners = (signals: NodeJS.Signals[], handler: () => void): void => {
+  signals.forEach(signal => process.on(signal, handler));
+};
+
+// WebAPI style with AbortController
+export const createSignalHandler = (signal: NodeJS.Signals): AbortController => {
+  const controller = new AbortController();
+  
+  process.on(signal, () => {
+    controller.abort();
+  });
+  
+  return controller;
+};
 ```
 
-## Error Types
+## Error Types (Web-compatible)
 
 ### Custom Error Classes
 
@@ -283,121 +508,209 @@ process.on('SIGINT', handler);
 // Deno
 throw new Deno.errors.NotFound('File not found');
 
-// Node.js
-class DenoCompatErrors {
-  static NotFound = class extends Error {
-    constructor(message) {
-      super(message);
-      this.name = 'NotFound';
+// WebAPI + Node ESM - Standards-compliant errors
+export class WebCompatErrors {
+  static NotFound = class NotFoundError extends Error {
+    readonly name = 'NotFoundError';
+    readonly code = 'ENOENT';
+    
+    constructor(message = 'Not found', options?: ErrorOptions) {
+      super(message, options);
     }
   };
-  
-  static AlreadyExists = class extends Error {
-    constructor(message) {
-      super(message);
-      this.name = 'AlreadyExists';
+
+  static AlreadyExists = class AlreadyExistsError extends Error {
+    readonly name = 'AlreadyExistsError'; 
+    readonly code = 'EEXIST';
+    
+    constructor(message = 'Already exists', options?: ErrorOptions) {
+      super(message, options);
     }
   };
-  
-  static PermissionDenied = class extends Error {
-    constructor(message) {
-      super(message);
-      this.name = 'PermissionDenied';
+
+  static PermissionDenied = class PermissionDeniedError extends Error {
+    readonly name = 'PermissionDeniedError';
+    readonly code = 'EACCES';
+    
+    constructor(message = 'Permission denied', options?: ErrorOptions) {
+      super(message, options);
     }
   };
 }
 
-throw new DenoCompatErrors.NotFound('File not found');
+// Map Node.js errors to WebAPI-style errors
+export const mapNodeError = (error: NodeJS.ErrnoException): Error => {
+  switch (error.code) {
+    case 'ENOENT':
+      return new WebCompatErrors.NotFound(error.message, { cause: error });
+    case 'EEXIST':
+      return new WebCompatErrors.AlreadyExists(error.message, { cause: error });
+    case 'EACCES':
+    case 'EPERM':
+      return new WebCompatErrors.PermissionDenied(error.message, { cause: error });
+    default:
+      return error;
+  }
+};
 ```
 
-## Import Meta Compatibility
+## Text Encoding (WebAPI Standard)
 
-#### `import.meta.url` and `Deno.execPath()`
+### TextEncoder/TextDecoder
+
 ```typescript
-// Deno
-const isMain = import.meta.url === `file://${Deno.execPath()}`;
+// Deno (already WebAPI compliant)
+const encoder = new TextEncoder();
+const decoder = new TextDecoder();
 
-// Node.js
-import { fileURLToPath } from 'url';
-import { normalize } from 'path';
+// WebAPI + Node ESM (same API!)
+// These are already available globally in modern Node.js
+const encoder = new TextEncoder();
+const decoder = new TextDecoder();
 
-const isMain = normalize(process.argv[1]) === normalize(fileURLToPath(import.meta.url));
+// Explicit import if needed
+import { TextEncoder, TextDecoder } from 'node:util';
+
+// WebAPI-first approach with fallback
+const encoder = globalThis.TextEncoder ?? 
+  (await import('node:util')).TextEncoder;
 ```
 
-## Runtime Detection Pattern
+## Runtime Detection (Modern Approach)
 
-### Unified Runtime Detection
+### Feature-based Detection
+
 ```typescript
-// Current pattern in codebase
+// Old Deno/Node dual support
 const isDeno = typeof Deno !== 'undefined';
 const isNode = typeof process !== 'undefined' && process.versions?.node;
 
-// Post-migration (Node.js only)
-const isNode = true;
-const isDeno = false;
+// Modern feature-based detection
+const hasNodeFS = async () => {
+  try {
+    await import('node:fs');
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const hasWebStreams = () => {
+  return typeof ReadableStream !== 'undefined' && 
+         typeof WritableStream !== 'undefined';
+};
+
+// Runtime agnostic approach
+export const createRuntimeAdapter = async () => {
+  const features = {
+    nodeFS: await hasNodeFS(),
+    webStreams: hasWebStreams(),
+    textEncoder: typeof TextEncoder !== 'undefined',
+    process: typeof globalThis.process !== 'undefined'
+  };
+
+  return {
+    features,
+    // Use WebAPIs when possible, fallback to Node-specific
+    fs: features.nodeFS ? await import('node:fs/promises') : null,
+    process: features.process ? globalThis.process : null,
+    streams: features.webStreams ? { 
+      ReadableStream: globalThis.ReadableStream,
+      WritableStream: globalThis.WritableStream
+    } : null
+  };
+};
 ```
 
-## Migration Helpers
+## Migration Utilities
 
-### Utility Functions
+### WebAPI-first Utilities
+
 ```typescript
-// Helper function for cross-platform compatibility
-export const createNodeCompat = () => ({
-  // File system
-  mkdir: (path, options) => mkdir(path, { recursive: options?.recursive }),
-  readDir: async (path) => {
-    const entries = await readdir(path, { withFileTypes: true });
-    return entries.map(entry => ({
-      name: entry.name,
-      isFile: entry.isFile(),
-      isDirectory: entry.isDirectory()
-    }));
-  },
+// Unified API that works across runtimes
+export const createWebCompatAPI = async () => {
+  const fs = await import('node:fs/promises');
+  const process = globalThis.process;
   
-  // Process
-  args: process.argv.slice(2),
-  pid: process.pid,
-  exit: process.exit,
-  
-  // Environment
-  env: {
-    get: (key) => process.env[key],
-    toObject: () => ({ ...process.env })
-  },
-  
-  // Platform
-  build: {
-    os: process.platform === 'win32' ? 'windows' : process.platform,
-    arch: process.arch
-  }
-});
+  return {
+    // File operations
+    readTextFile: async (path: string): Promise<string> => {
+      const buffer = await fs.readFile(path);
+      return new TextDecoder().decode(buffer);
+    },
+    
+    writeTextFile: async (path: string, content: string): Promise<void> => {
+      const encoded = new TextEncoder().encode(content);
+      await fs.writeFile(path, encoded);
+    },
+    
+    mkdir: fs.mkdir,
+    remove: fs.rm,
+    stat: fs.stat,
+    
+    // Process operations
+    args: process?.argv.slice(2) ?? [],
+    pid: process?.pid ?? 0,
+    env: {
+      get: (key: string) => process?.env[key],
+      toObject: () => ({ ...process?.env })
+    },
+    
+    // Command execution  
+    Command,
+    
+    // Streams
+    StandardStreams,
+    
+    // Errors
+    errors: WebCompatErrors
+  };
+};
 ```
 
 ## Testing Patterns
 
-### Before/After Comparison
+### WebAPI Compatibility Testing
+
 ```typescript
-// Test helper for validating migrations
-export const testMigration = async (denoCode, nodeCode, input) => {
-  // This would be used during migration to ensure behavior parity
-  const denoResult = await runDenoCode(denoCode, input);
-  const nodeResult = await runNodeCode(nodeCode, input);
+// Test that WebAPI standards work correctly
+export const testWebAPICompliance = async () => {
+  // TextEncoder/TextDecoder should work
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+  const text = 'Hello, World!';
+  const encoded = encoder.encode(text);
+  const decoded = decoder.decode(encoded);
+  console.assert(text === decoded, 'TextEncoder/TextDecoder failed');
   
-  assert.deepEqual(denoResult, nodeResult);
+  // WebStreams should work
+  const readable = new ReadableStream({
+    start(controller) {
+      controller.enqueue(new TextEncoder().encode('test'));
+      controller.close();
+    }
+  });
+  
+  const reader = readable.getReader();
+  const { value } = await reader.read();
+  console.assert(value instanceof Uint8Array, 'WebStreams failed');
+  
+  console.log('✅ WebAPI compliance verified');
 };
 ```
 
 ## Performance Considerations
 
-### Differences to Watch
-1. **Stream handling**: Node.js streams have different performance characteristics
-2. **File I/O**: Node.js may require different buffer management
-3. **Process spawning**: Child process creation patterns differ slightly
-4. **Memory usage**: `process.memoryUsage()` returns different structure than `Deno.memoryUsage()`
+### ESM Benefits
+1. **Tree Shaking**: Only import what you need from `node:*` modules
+2. **Static Analysis**: Better bundling and optimization
+3. **Explicit Dependencies**: Clear import/export relationships
+4. **Standards Compliance**: Future-proof with web standards
 
-## Next Steps
+### WebAPI Benefits
+1. **Cross-Runtime**: Code works in Node.js, Bun, Deno
+2. **Native Performance**: Direct browser/runtime optimizations
+3. **Type Safety**: Built-in TypeScript definitions
+4. **Standards Track**: Following web platform evolution
 
-1. Use this mapping to update each file systematically
-2. Implement utility functions for common patterns  
-3. Create test cases to verify behavior parity
-4. Monitor performance after migration
+This mapping guide ensures a modern, standards-compliant migration that leverages the best of both WebAPIs and Node.js ESM modules.
