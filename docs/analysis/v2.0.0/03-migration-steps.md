@@ -14,8 +14,11 @@ cp -r src/ src-backup-$(date +%Y%m%d)
 
 ### 2. Environment Setup
 ```bash
-# Ensure Node.js 18+ is installed
+# Ensure Node.js 18+ is installed (for WebAPI and ESM support)
 node --version
+
+# Verify ESM and WebAPI support
+node -e "console.log(!!globalThis.TextEncoder && !!globalThis.ReadableStream)"
 
 # Install required dependencies
 npm install
