@@ -29,24 +29,24 @@ This directory contains a comprehensive analysis and migration plan for removing
 
 ### 2. [API Mapping Guide](./02-api-mapping-guide.md)
 **Technical reference for developers**
-- Exact Node.js equivalents for every Deno API
-- Code examples showing before/after patterns  
-- Helper functions and compatibility layers
-- Testing patterns for validation
+- Exact WebAPI + Node ESM equivalents for every Deno API
+- Code examples showing modern standards-compliant patterns
+- WebAPI-style helper functions and compatibility layers
+- Cross-runtime testing patterns for validation
 
 ### 3. [Migration Steps](./03-migration-steps.md)
 **Detailed execution plan**
-- Phase-by-phase migration approach
-- Step-by-step instructions for each file
-- Testing and validation procedures
-- Rollback procedures and risk mitigation
+- Phase-by-phase WebAPI migration approach
+- Step-by-step instructions for modernizing each file
+- WebAPI compliance testing and validation procedures
+- Rollback procedures and risk mitigation strategies
 
-### 4. [Node.js Implementation Guide](./04-nodejs-migration-guide.md)
+### 4. [WebAPI Implementation Guide](./04-webapi-migration-guide.md)
 **Implementation details and best practices**
-- Detailed code examples for complex migrations
-- Performance optimization strategies
-- Cross-platform compatibility considerations
-- Integration testing approaches
+- Detailed code examples for WebAPI + ESM migrations
+- Standards-compliant implementation patterns
+- Cross-runtime compatibility strategies
+- Performance optimization with modern APIs
 
 ### 5. [Comprehensive Removal Plan](./05-comprehensive-removal-plan.md)
 **Complete project plan and strategic overview**
