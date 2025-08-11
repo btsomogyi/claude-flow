@@ -4,13 +4,14 @@
 
 This document provides the definitive plan for removing all Deno framework dependencies from the claude-flow project and transitioning to modern TypeScript WebAPIs with Node.js ESM `node:*` modules. The migration affects **28 files** with **150+ Deno API calls** across the entire `/src` directory.
 
-### Strategic Advantages of Deno Removal
+### Strategic Advantages of WebAPI Migration
 
-1. **Simplified Deployment**: Single runtime dependency (Node.js)
-2. **Broader Compatibility**: Native npm ecosystem integration
-3. **Reduced Complexity**: Elimination of dual-runtime compatibility layers
-4. **Performance Optimization**: Direct Node.js API usage without abstraction overhead
-5. **Maintenance Reduction**: Single codebase to maintain and test
+1. **Standards Compliance**: Modern WebAPI standards for future compatibility
+2. **Cross-Runtime Support**: Code works in Node.js, Bun, and future runtimes  
+3. **Type Safety**: Native TypeScript support without @types dependencies
+4. **ESM Benefits**: Tree-shaking, explicit imports, better static analysis
+5. **Performance**: Direct access to optimized native implementations
+6. **Future-Proofing**: Following Web Platform standards evolution
 
 ### Migration Scope
 
