@@ -269,6 +269,9 @@ describe('ProcessUI', () => {
     });
 
     it('should start all processes', async () => {
+      // Mock Deno.stdin.read to simulate user input
+      mockDeno.stdin.read.mockResolvedValue(1);
+      
       const startAll = processUI['startAll'].bind(processUI);
       
       await startAll();
