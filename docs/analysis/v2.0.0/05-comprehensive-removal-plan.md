@@ -26,7 +26,7 @@ This document provides the definitive plan for removing all Deno framework depen
 
 ## Phase-by-Phase Execution Plan
 
-### Phase 1: Infrastructure Preparation (Day 1)
+### Phase 1: WebAPI Infrastructure Preparation (Day 1)
 
 #### 1.1 Backup and Branch Setup
 ```bash
@@ -36,24 +36,25 @@ git push origin backup/deno-migration-$(date +%Y%m%d)
 
 # Create migration branch
 git checkout main
-git checkout -b feature/remove-deno-dependencies
+git checkout -b feature/migrate-to-webapi-esm
 ```
 
-#### 1.2 Enhance Node.js Compatibility Layer
-**Target File**: `src/cli/node-compat.js`
+#### 1.2 Create WebAPI Compatibility Layer
+**New File**: `src/utils/webapi-compat.ts`
 
-**Additions Required**:
-- Stream I/O helpers for stdin/stdout operations
-- Command execution wrapper class
-- Signal handling abstraction
-- Memory usage compatibility
-- Error type mapping
+**Components Required**:
+- WebAPI-style file system operations using `node:fs/promises`
+- Standards-compliant command execution with `node:child_process`
+- WebStreams API implementation for I/O operations
+- Web-compatible error classes with proper inheritance
+- Feature-based runtime detection
 
-#### 1.3 Create Migration Utilities
+#### 1.3 Create Modern Utilities  
 **New Files to Create**:
-- `src/utils/command-executor.js` - Deno.Command replacement
-- `src/utils/stream-io.js` - Stream I/O operations
-- `src/utils/node-runtime.js` - Runtime detection and initialization
+- `src/utils/webapi-compat.ts` - WebAPI + ESM compatibility layer
+- `src/utils/webstreams-io.ts` - WebStreams API operations  
+- `src/utils/webapi-errors.ts` - Standards-compliant error classes
+- `src/utils/runtime-adapter.ts` - Feature-based runtime adapter
 
 ### Phase 2: Core CLI Migration (Days 2-3)
 
