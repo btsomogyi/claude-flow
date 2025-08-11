@@ -114,19 +114,19 @@ Start with: `03-migration-steps.md`
 ## File Priority Matrix
 
 ### Critical Path (Complete First)
-1. `src/cli/runtime-detector.js` - Core runtime detection
-2. `src/swarm/coordinator.ts` - Heavy Deno usage (12 calls)
-3. `src/cli/simple-cli.ts` - Primary CLI interface
+1. `src/utils/runtime-adapter.ts` - Modern feature-based detection (replaces runtime-detector.js)
+2. `src/swarm/coordinator.ts` - Heavy Deno usage (12 calls) → WebAPI + ESM
+3. `src/cli/simple-cli.ts` - Primary CLI interface → WebStreams API
 
 ### Core Functionality  
-4. `src/cli/index.ts` - Main entry point
-5. `src/cli/commands/swarm.ts` - Swarm management
-6. `src/cli/commands/start/start-command.ts` - Start command
+4. `src/cli/index.ts` - Main entry point → ESM imports + AbortController
+5. `src/cli/commands/swarm.ts` - Swarm management → Standards-compliant Command class
+6. `src/cli/commands/start/start-command.ts` - Start command → WebAPI patterns
 
 ### Support Systems
-7. Validation and initialization scripts (10 files)
-8. Utility files and helpers (4 files)
-9. Command implementations (remaining 8 files)
+7. Validation and initialization scripts (10 files) → node:fs/promises + WebAPI errors
+8. Utility files and helpers (4 files) → WebAPI compatibility layers  
+9. Command implementations (remaining 8 files) → ESM + WebAPI patterns
 
 ## Testing Strategy
 
