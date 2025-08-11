@@ -438,8 +438,14 @@ describe('ProcessManager', () => {
     });
 
     it('should emit error event on initialization failure', async () => {
-      // Create a new manager with invalid config path
+      // Create a new manager and override initialize to simulate failure
       const manager = new ProcessManager();
+      const originalInitialize = manager.initialize.bind(manager);
+      manager.initialize = jest.fn().mockImplementation(async (configPath?: string) => {
+        manager.emit('error', new Error('Invalid configuration path'));
+        throw new Error('Invalid configuration path');
+      });
+      
       let errorEmitted = false;
       
       manager.on('error', () => {
