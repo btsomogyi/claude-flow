@@ -23,7 +23,7 @@ const mockDeno = {
 (global as any).Deno = mockDeno;
 
 // Mock the MCP server to prevent "already running" conflicts
-jest.mock('../../../../src/mcp/server.js', () => {
+jest.mock('../../../../src/mcp/server', () => {
   return {
     MCPServer: jest.fn().mockImplementation(() => ({
       start: jest.fn().mockResolvedValue(undefined),
@@ -35,7 +35,7 @@ jest.mock('../../../../src/mcp/server.js', () => {
 });
 
 // Mock other dependencies that might conflict
-jest.mock('../../../../src/core/orchestrator.js', () => {
+jest.mock('../../../../src/core/orchestrator', () => {
   return {
     Orchestrator: jest.fn().mockImplementation(() => ({
       initialize: jest.fn().mockResolvedValue(undefined),
@@ -44,7 +44,7 @@ jest.mock('../../../../src/core/orchestrator.js', () => {
   };
 });
 
-jest.mock('../../../../src/terminal/manager.js', () => {
+jest.mock('../../../../src/terminal/manager', () => {
   return {
     TerminalManager: jest.fn().mockImplementation(() => ({
       initialize: jest.fn().mockResolvedValue(undefined),
@@ -53,7 +53,7 @@ jest.mock('../../../../src/terminal/manager.js', () => {
   };
 });
 
-jest.mock('../../../../src/memory/manager.js', () => {
+jest.mock('../../../../src/memory/manager', () => {
   return {
     MemoryManager: jest.fn().mockImplementation(() => ({
       initialize: jest.fn().mockResolvedValue(undefined),
@@ -62,7 +62,7 @@ jest.mock('../../../../src/memory/manager.js', () => {
   };
 });
 
-jest.mock('../../../../src/coordination/manager.js', () => {
+jest.mock('../../../../src/coordination/manager', () => {
   return {
     CoordinationManager: jest.fn().mockImplementation(() => ({
       initialize: jest.fn().mockResolvedValue(undefined),
