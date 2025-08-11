@@ -30,37 +30,152 @@ npm test
 
 ### 3. Create Migration Branch
 ```bash
-git checkout -b feature/remove-deno-dependencies
+git checkout -b feature/migrate-to-webapis-esm
 ```
 
-## Phase 1: Enhance Compatibility Layer (Day 1)
+## Phase 1: Create WebAPI Compatibility Layer (Day 1)
 
-### Step 1.1: Update Node.js Compatibility Layer
-**File**: `src/cli/node-compat.js`
+### Step 1.1: Create WebAPI Compatibility Layer
+**New File**: `src/utils/webapi-compat.ts`
 
-```javascript
-// Add missing Node.js equivalents
-export const mkdirRecursive = async (path) => {
-  await mkdir(path, { recursive: true });
+```typescript
+// Modern WebAPI + Node ESM compatibility layer
+import { mkdir, readdir, readFile, writeFile, stat, rm, copyFile, chmod } from 'node:fs/promises';
+import { spawn } from 'node:child_process';
+import process from 'node:process';
+
+// File System Operations (WebAPI style)
+export const webApiFS = {
+  mkdir: async (path: string, options?: { recursive?: boolean }) => {
+    return mkdir(path, { recursive: options?.recursive });
+  },
+
+  readDir: async (path: string) => {
+    const entries = await readdir(path, { withFileTypes: true });
+    return entries.map(entry => ({
+      name: entry.name,
+      isFile: entry.isFile(),
+      isDirectory: entry.isDirectory(),
+      isSymlink: entry.isSymbolicLink()
+    }));
+  },
+
+  readTextFile: async (path: string): Promise<string> => {
+    const buffer = await readFile(path);
+    return new TextDecoder().decode(buffer);
+  },
+
+  writeTextFile: async (path: string, content: string): Promise<void> => {
+    const encoded = new TextEncoder().encode(content);
+    await writeFile(path, encoded);
+  },
+
+  stat: async (path: string) => {
+    const stats = await stat(path);
+    return {
+      isFile: stats.isFile(),
+      isDirectory: stats.isDirectory(),
+      isSymlink: stats.isSymbolicLink(),
+      size: stats.size,
+      mtime: stats.mtime,
+      atime: stats.atime,
+      birthtime: stats.birthtime,
+      mode: stats.mode
+    };
+  },
+
+  remove: async (path: string, options?: { recursive?: boolean }) => {
+    return rm(path, { recursive: options?.recursive, force: true });
+  },
+
+  copyFile: async (src: string, dest: string) => {
+    return copyFile(src, dest);
+  },
+
+  chmod: async (path: string, mode: number) => {
+    return chmod(path, mode);
+  }
 };
 
-export const removeRecursive = async (path) => {
-  await rm(path, { recursive: true, force: true });
+// Process Operations (WebAPI style)
+export const webApiProcess = {
+  args: process.argv.slice(2),
+  pid: process.pid,
+  env: {
+    get: (key: string) => process.env[key],
+    set: (key: string, value: string) => { process.env[key] = value; },
+    toObject: () => ({ ...process.env }),
+    has: (key: string) => key in process.env
+  },
+  build: {
+    os: process.platform === 'win32' ? 'windows' : 
+        process.platform === 'darwin' ? 'darwin' :
+        process.platform === 'linux' ? 'linux' : process.platform,
+    arch: process.arch,
+    target: `${process.arch}-${process.platform}`
+  },
+  memoryUsage: () => {
+    const usage = process.memoryUsage();
+    return {
+      rss: usage.rss,
+      heapUsed: usage.heapUsed,
+      heapTotal: usage.heapTotal,
+      external: usage.external,
+      heap: usage.heapUsed // Deno compatibility
+    };
+  },
+  exit: (code?: number) => process.exit(code),
+  kill: (pid: number, signal?: NodeJS.Signals) => process.kill(pid, signal)
 };
 
-export const addSignalListener = (signal, handler) => {
+// Signal Handling (WebAPI style) 
+export const addSignalListener = (signal: NodeJS.Signals, handler: () => void) => {
   process.on(signal, handler);
 };
 
-export const memoryUsage = () => {
-  const usage = process.memoryUsage();
-  return {
-    rss: usage.rss,
-    heapUsed: usage.heapUsed,
-    heapTotal: usage.heapTotal,
-    external: usage.external
-  };
-};
+// Command Execution (Standards-compliant)
+export class Command {
+  constructor(
+    private command: string,
+    private options: {
+      args?: string[];
+      cwd?: string;
+      env?: Record<string, string>;
+    } = {}
+  ) {}
+
+  async output(): Promise<{
+    success: boolean;
+    code: number;
+    stdout: Uint8Array;
+    stderr: Uint8Array;
+  }> {
+    return new Promise((resolve, reject) => {
+      const child = spawn(this.command, this.options.args ?? [], {
+        cwd: this.options.cwd,
+        env: { ...process.env, ...this.options.env },
+        stdio: ['pipe', 'pipe', 'pipe']
+      });
+
+      const stdout: Buffer[] = [];
+      const stderr: Buffer[] = [];
+
+      child.stdout?.on('data', data => stdout.push(data));
+      child.stderr?.on('data', data => stderr.push(data));
+
+      child.on('close', code => {
+        resolve({
+          success: code === 0,
+          code: code ?? -1,
+          stdout: new Uint8Array(Buffer.concat(stdout)),
+          stderr: new Uint8Array(Buffer.concat(stderr))
+        });
+      });
+
+      child.on('error', reject);
+    });
+  }
+}
 ```
 
 ### Step 1.2: Create Command Execution Helper
