@@ -163,15 +163,15 @@ Start with: `03-migration-steps.md`
 ## Risk Management
 
 ### High-Risk Areas
-1. **Stream I/O Operations**: Complex API differences
-2. **Cross-Platform Compatibility**: Platform-specific behaviors
-3. **Command Execution**: Subprocess handling patterns
+1. **WebStreams API Migration**: Complex transition to Web standards
+2. **Cross-Runtime Compatibility**: Ensuring code works across multiple runtimes
+3. **Standards Compliance**: Proper WebAPI implementation patterns
 
 ### Mitigation Strategies
-1. **Comprehensive Testing**: Automated and manual validation
-2. **Gradual Migration**: File-by-file approach with validation
-3. **Rollback Procedures**: Quick recovery if issues arise
-4. **Monitoring**: Enhanced logging during rollout
+1. **WebAPI Testing**: Comprehensive standards compliance validation
+2. **Feature Detection**: Runtime-agnostic code using capability detection
+3. **Rollback Procedures**: Quick recovery with migration branch strategy
+4. **Cross-Runtime Testing**: Validation against Node.js, Bun environments
 
 ## Support and Communication
 
