@@ -251,6 +251,9 @@ describe('ProcessUI', () => {
     });
 
     it('should restart process', async () => {
+      // Mock Deno.stdin.read to simulate user input
+      mockDeno.stdin.read.mockResolvedValue(1);
+      
       const restartProcess = processUI['restartProcess'].bind(processUI);
       
       // Start first
