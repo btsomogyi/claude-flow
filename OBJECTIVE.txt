@@ -1,0 +1,7 @@
+when attempting to integrate claude-flow as an MCP server in a service such as Cursor, the number of tools within claude-flow causes Cursor to disable the MCP server, as there is a limit to the number of tools that can be enabled across all MCP servers.
+
+Please generate an implementation plan to create a tool filtering mechanism within claude-flow, that would allow a user to easily modify a configuration file in order to whitelist which tools the claude-flow MCP server will be enable.  This should limit the number of tools that a platform such as Cursor is aware of, ie disabled tools should not appear at all in claude-flow MCP listings.
+
+Please also inspect this PR for claude-flow, including the implementation, and ensure that the implementation plan for this tool filtering is compatible with the changes in this PR. 
+
+Please create the implementation file FILTERING.md with this step-by-step plan, but do not modify any code at this time.  Do not modify this file.
